@@ -2,6 +2,11 @@
 
 Require an email address before visitors can download a file.
 
+## Contributors
+
+- HDYHaus
+- MariaOJob
+
 ## Features
 
 - Create downloadable offers in WordPress admin.
