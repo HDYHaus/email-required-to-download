@@ -4,7 +4,7 @@ Require an email address before visitors can download a file.
 
 ## Contributors
 
-- HDYHaus
+- HDY Haus
 - MariaOJob
 
 ## Features

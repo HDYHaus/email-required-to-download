@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/HDYHaus/email-required-to-download
  * Description: Require an email address before visitors can download a file.
  * Version: 1.0.1
- * Author: HDYHaus, MariaOJob
+ * Author: HDY Haus, MariaOJob
  * Text Domain: email-required-to-download
  * Requires at least: 6.0
  * Requires PHP: 7.4
