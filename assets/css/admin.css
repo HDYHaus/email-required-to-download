@@ -1,0 +1,30 @@
+.erd-admin .erd-stats {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(140px, 1fr));
+	gap: 12px;
+	margin: 16px 0;
+	max-width: 760px;
+}
+
+.erd-admin .erd-stats div {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	padding: 16px;
+}
+
+.erd-admin .erd-stats strong {
+	display: block;
+	font-size: 28px;
+	line-height: 1.2;
+}
+
+.erd-admin .erd-stats span {
+	color: #646970;
+}
+
+.erd-admin .erd-filter {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	margin: 16px 0;
+}

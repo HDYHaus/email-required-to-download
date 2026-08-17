@@ -1,0 +1,52 @@
+.erd-download {
+	max-width: 420px;
+}
+
+.erd-form {
+	display: grid;
+	gap: 12px;
+}
+
+.erd-form label {
+	display: grid;
+	gap: 4px;
+}
+
+.erd-form input[type="email"],
+.erd-form input[type="text"] {
+	width: 100%;
+}
+
+.erd-consent {
+	align-items: start;
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 8px;
+}
+
+.erd-form button,
+.erd-download-button {
+	align-self: start;
+	background: #1d2327;
+	border: 0;
+	color: #fff;
+	cursor: pointer;
+	display: inline-block;
+	padding: 10px 16px;
+	text-decoration: none;
+}
+
+.erd-message {
+	margin-bottom: 12px;
+	padding: 10px 12px;
+}
+
+.erd-success {
+	background: #edf7ed;
+	border-left: 4px solid #1f7a1f;
+}
+
+.erd-error {
+	background: #fcf0f1;
+	border-left: 4px solid #b32d2e;
+}
