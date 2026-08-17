@@ -129,7 +129,7 @@ class ERD_Frontend {
 	}
 
 	public function download() {
-		$token = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : '';
+		$token = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$parts = ERD_Tokens::parse( $token );
 
 		if ( ! $parts ) {
