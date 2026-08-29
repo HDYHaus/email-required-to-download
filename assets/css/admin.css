@@ -54,11 +54,16 @@
 .erd-admin-form-page input[type="text"],
 .erd-admin-form-page input[type="url"],
 .erd-admin-form-page textarea {
-	border-color: #c3c4c7;
-	border-radius: 4px;
+	background: #fff;
+	border: 1px solid #b8c1cc;
+	border-radius: 6px;
 	box-shadow: none;
-	min-height: 36px;
-	padding: 6px 10px;
+	color: #1d2327;
+	font-size: 14px;
+	line-height: 1.45;
+	min-height: 42px;
+	padding: 8px 12px;
+	transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 
 .erd-admin-form-page input[type="email"]:focus,
@@ -67,7 +72,7 @@
 .erd-admin-form-page input[type="url"]:focus,
 .erd-admin-form-page textarea:focus {
 	border-color: #2271b1;
-	box-shadow: 0 0 0 1px #2271b1;
+	box-shadow: 0 0 0 1px #2271b1, 0 0 0 4px rgba(34, 113, 177, 0.12);
 	outline: 2px solid transparent;
 }
 
@@ -75,6 +80,10 @@
 .erd-admin-form-page .large-text {
 	max-width: 100%;
 	width: 100%;
+}
+
+.erd-admin-form-page > form > .form-table > tbody > tr > td > .regular-text {
+	max-width: 620px;
 }
 
 .erd-admin-form-page input[type="number"] {
