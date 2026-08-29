@@ -36,6 +36,12 @@
 	text-decoration: none;
 }
 
+.erd-download-list {
+	display: grid;
+	gap: 8px;
+	margin-top: 12px;
+}
+
 .erd-message {
 	margin-bottom: 12px;
 	padding: 10px 12px;

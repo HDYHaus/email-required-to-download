@@ -4,7 +4,7 @@ Tags: downloads, lead capture, email, media
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,10 +17,11 @@ Email Required to Download lets site owners create gated download offers, collec
 == Features ==
 
 * Create downloadable offers in WordPress admin.
-* Select or upload a file from the Media Library.
+* Select or upload one or more files from the Media Library.
 * Embed offers with `[email_required_download id="123"]`.
 * Collect email, optional name, and required consent.
 * Support immediate downloads or email-confirmed download links per offer.
+* Unlock multiple files from a single email submission.
 * Store leads locally in WordPress.
 * Track submissions, unique emails, and downloads.
 * Export lead and download data as CSV.
@@ -32,6 +33,11 @@ Email Required to Download lets site owners create gated download offers, collec
 3. Open Email Downloads to create your first offer.
 
 == Changelog ==
+
+= 1.1.0 =
+* Add support for multiple files per gated download offer.
+* Keep download tracking at the offer/lead level for lightweight bundled offers.
+* Show confirmation email send status in Leads & Analytics and CSV exports.
 
 = 1.0.2 =
 * Add WordPress.org-compatible license and readme metadata.

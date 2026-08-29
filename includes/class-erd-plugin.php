@@ -23,6 +23,10 @@ class ERD_Plugin {
 	public function init() {
 		$this->repository = new ERD_Repository();
 
+		if ( get_option( 'erd_db_version' ) !== ERD_DB_VERSION ) {
+			ERD_Activator::activate();
+		}
+
 		add_filter( 'plugin_action_links_' . plugin_basename( ERD_PLUGIN_FILE ), array( $this, 'plugin_action_links' ) );
 
 		if ( is_admin() ) {

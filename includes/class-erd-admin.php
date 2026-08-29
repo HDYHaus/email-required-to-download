@@ -120,6 +120,7 @@ class ERD_Admin {
 	public function render_edit_offer_page() {
 		$offer_id = isset( $_GET['offer_id'] ) ? absint( $_GET['offer_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$offer    = $offer_id ? $this->repository->get_offer( $offer_id ) : null;
+		$files    = $offer_id ? $this->repository->get_offer_files( $offer_id ) : array();
 		$settings = $this->repository->get_settings();
 		$defaults = array(
 			'id'                   => 0,
@@ -133,6 +134,15 @@ class ERD_Admin {
 			'consent_text'         => __( 'I agree to be contacted about this download and understand my information will be stored according to the site privacy policy.', 'email-required-to-download' ),
 		);
 		$data     = $offer ? wp_parse_args( (array) $offer, $defaults ) : $defaults;
+		if ( ! $files ) {
+			$files = array(
+				(object) array(
+					'file_id'    => $data['file_id'],
+					'file_url'   => $data['file_url'],
+					'file_label' => $data['title'],
+				),
+			);
+		}
 		?>
 		<div class="wrap erd-admin">
 			<h1><?php echo $offer ? esc_html__( 'Edit Offer', 'email-required-to-download' ) : esc_html__( 'Add Offer', 'email-required-to-download' ); ?></h1>
@@ -146,11 +156,20 @@ class ERD_Admin {
 						<td><input class="regular-text" id="erd-title" name="title" required value="<?php echo esc_attr( $data['title'] ); ?>"></td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'File', 'email-required-to-download' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Files', 'email-required-to-download' ); ?></th>
 						<td>
-							<input id="erd-file-id" type="hidden" name="file_id" value="<?php echo esc_attr( $data['file_id'] ); ?>">
-							<input id="erd-file-url" class="regular-text" type="url" name="file_url" required value="<?php echo esc_attr( $data['file_url'] ); ?>">
-							<button type="button" class="button erd-select-file"><?php esc_html_e( 'Select File', 'email-required-to-download' ); ?></button>
+							<div class="erd-files" data-empty-label="<?php echo esc_attr__( 'File label', 'email-required-to-download' ); ?>">
+								<?php foreach ( $files as $file ) : ?>
+									<div class="erd-file-row">
+										<input class="erd-file-id" type="hidden" name="file_ids[]" value="<?php echo esc_attr( $file->file_id ); ?>">
+										<input class="regular-text erd-file-url" type="url" name="file_urls[]" required placeholder="<?php echo esc_attr__( 'File URL', 'email-required-to-download' ); ?>" value="<?php echo esc_attr( $file->file_url ); ?>">
+										<input class="regular-text erd-file-label" type="text" name="file_labels[]" placeholder="<?php echo esc_attr__( 'File label', 'email-required-to-download' ); ?>" value="<?php echo esc_attr( $file->file_label ); ?>">
+										<button type="button" class="button erd-select-file"><?php esc_html_e( 'Select File', 'email-required-to-download' ); ?></button>
+										<button type="button" class="button erd-remove-file"><?php esc_html_e( 'Remove', 'email-required-to-download' ); ?></button>
+									</div>
+								<?php endforeach; ?>
+							</div>
+							<p><button type="button" class="button erd-add-file"><?php esc_html_e( 'Add File', 'email-required-to-download' ); ?></button></p>
 						</td>
 					</tr>
 					<tr>
@@ -204,7 +223,7 @@ class ERD_Admin {
 				<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=erd_export_leads&offer_id=' . absint( $offer_id ) ), 'erd_export_leads' ) ); ?>"><?php esc_html_e( 'Export CSV', 'email-required-to-download' ); ?></a>
 			</form>
 			<table class="widefat striped">
-				<thead><tr><th><?php esc_html_e( 'Offer', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Email', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Name', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Submitted', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Downloads', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Downloaded', 'email-required-to-download' ); ?></th></tr></thead>
+				<thead><tr><th><?php esc_html_e( 'Offer', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Email', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Name', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Submitted', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Email Status', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Downloads', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Downloaded', 'email-required-to-download' ); ?></th></tr></thead>
 				<tbody>
 					<?php if ( $leads ) : ?>
 						<?php foreach ( $leads as $lead ) : ?>
@@ -213,12 +232,13 @@ class ERD_Admin {
 								<td><a href="mailto:<?php echo esc_attr( $lead->email ); ?>"><?php echo esc_html( $lead->email ); ?></a></td>
 								<td><?php echo esc_html( $lead->name ); ?></td>
 								<td><?php echo esc_html( $lead->submitted_at ); ?></td>
+								<td><?php echo esc_html( $this->email_status_label( $lead ) ); ?></td>
 								<td><?php echo esc_html( $lead->download_count ); ?></td>
 								<td><?php echo esc_html( $lead->downloaded_at ); ?></td>
 							</tr>
 						<?php endforeach; ?>
 					<?php else : ?>
-						<tr><td colspan="6"><?php esc_html_e( 'No leads yet.', 'email-required-to-download' ); ?></td></tr>
+						<tr><td colspan="7"><?php esc_html_e( 'No leads yet.', 'email-required-to-download' ); ?></td></tr>
 					<?php endif; ?>
 				</tbody>
 			</table>
@@ -263,19 +283,29 @@ class ERD_Admin {
 			wp_die( esc_html__( 'You are not allowed to save this offer.', 'email-required-to-download' ) );
 		}
 
-		$file_id  = isset( $_POST['file_id'] ) ? absint( $_POST['file_id'] ) : 0;
-		$file_url = isset( $_POST['file_url'] ) ? esc_url_raw( wp_unslash( $_POST['file_url'] ) ) : '';
-		if ( $file_id ) {
-			$attachment_url = wp_get_attachment_url( $file_id );
-			if ( $attachment_url ) {
-				$file_url = $attachment_url;
+		$files       = array();
+		$file_ids    = isset( $_POST['file_ids'] ) && is_array( $_POST['file_ids'] ) ? array_map( 'absint', wp_unslash( $_POST['file_ids'] ) ) : array();
+		$file_urls   = isset( $_POST['file_urls'] ) && is_array( $_POST['file_urls'] ) ? array_map( 'esc_url_raw', wp_unslash( $_POST['file_urls'] ) ) : array();
+		$file_labels = isset( $_POST['file_labels'] ) && is_array( $_POST['file_labels'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['file_labels'] ) ) : array();
+		foreach ( $file_urls as $index => $file_url ) {
+			$file_id = isset( $file_ids[ $index ] ) ? absint( $file_ids[ $index ] ) : 0;
+			if ( $file_id ) {
+				$attachment_url = wp_get_attachment_url( $file_id );
+				if ( $attachment_url ) {
+					$file_url = $attachment_url;
+				}
 			}
+
+			$files[] = array(
+				'file_id'    => $file_id,
+				'file_url'   => $file_url,
+				'file_label' => isset( $file_labels[ $index ] ) ? $file_labels[ $index ] : '',
+			);
 		}
 
 		$data = array(
 			'title'                => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
-			'file_id'              => $file_id,
-			'file_url'             => $file_url,
+			'files'                => $files,
 			'button_text'          => isset( $_POST['button_text'] ) ? sanitize_text_field( wp_unslash( $_POST['button_text'] ) ) : '',
 			'success_message'      => isset( $_POST['success_message'] ) ? wp_kses_post( wp_unslash( $_POST['success_message'] ) ) : '',
 			'name_required'        => ! empty( $_POST['name_required'] ),
@@ -283,8 +313,8 @@ class ERD_Admin {
 			'consent_text'         => isset( $_POST['consent_text'] ) ? wp_kses_post( wp_unslash( $_POST['consent_text'] ) ) : '',
 		);
 
-		if ( '' === $data['title'] || '' === $data['file_url'] || '' === $data['consent_text'] ) {
-			wp_die( esc_html__( 'Title, file, and consent text are required.', 'email-required-to-download' ) );
+		if ( '' === $data['title'] || ! $this->has_file_url( $files ) || '' === $data['consent_text'] ) {
+			wp_die( esc_html__( 'Title, at least one file, and consent text are required.', 'email-required-to-download' ) );
 		}
 
 		$this->repository->save_offer( $data, isset( $_POST['offer_id'] ) ? absint( $_POST['offer_id'] ) : 0 );
@@ -332,11 +362,41 @@ class ERD_Admin {
 		header( 'Content-Disposition: attachment; filename=email-required-download-leads.csv' );
 
 		$output = fopen( 'php://output', 'w' );
-		fputcsv( $output, array( 'Offer', 'Email', 'Name', 'Consent Given', 'Consent Text', 'Consent At', 'Submitted At', 'Downloaded At', 'Download Count', 'Referrer', 'IP Hash', 'User Agent' ) );
+		fputcsv( $output, array( 'Offer', 'Email', 'Name', 'Consent Given', 'Consent Text', 'Consent At', 'Submitted At', 'Email Status', 'Email Sent At', 'Downloaded At', 'Download Count', 'Referrer', 'IP Hash', 'User Agent' ) );
 		foreach ( $leads as $lead ) {
-			fputcsv( $output, array( $lead->offer_title, $lead->email, $lead->name, $lead->consent_given, $lead->consent_text, $lead->consent_at, $lead->submitted_at, $lead->downloaded_at, $lead->download_count, $lead->referrer, $lead->ip_hash, $lead->user_agent ) );
+			fputcsv( $output, array( $lead->offer_title, $lead->email, $lead->name, $lead->consent_given, $lead->consent_text, $lead->consent_at, $lead->submitted_at, $lead->email_status, $lead->email_sent_at, $lead->downloaded_at, $lead->download_count, $lead->referrer, $lead->ip_hash, $lead->user_agent ) );
 		}
 		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		exit;
+	}
+
+	private function has_file_url( array $files ) {
+		foreach ( $files as $file ) {
+			if ( ! empty( $file['file_url'] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private function email_status_label( $lead ) {
+		$status = isset( $lead->email_status ) ? $lead->email_status : 'not_required';
+		if ( 'sent' === $status && ! empty( $lead->email_sent_at ) ) {
+			return sprintf(
+				/* translators: %s: date and time the email was sent */
+				__( 'Sent %s', 'email-required-to-download' ),
+				$lead->email_sent_at
+			);
+		}
+
+		$labels = array(
+			'not_required' => __( 'Not required', 'email-required-to-download' ),
+			'pending'      => __( 'Pending', 'email-required-to-download' ),
+			'sent'         => __( 'Sent', 'email-required-to-download' ),
+			'failed'       => __( 'Failed', 'email-required-to-download' ),
+		);
+
+		return isset( $labels[ $status ] ) ? $labels[ $status ] : $labels['not_required'];
 	}
 }

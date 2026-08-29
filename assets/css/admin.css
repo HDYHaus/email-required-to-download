@@ -28,3 +28,23 @@
 	align-items: center;
 	margin: 16px 0;
 }
+
+.erd-admin .erd-files {
+	display: grid;
+	gap: 8px;
+	max-width: 980px;
+}
+
+.erd-admin .erd-file-row {
+	align-items: center;
+	display: grid;
+	gap: 8px;
+	grid-template-columns: minmax(220px, 1.4fr) minmax(180px, 1fr) auto auto;
+}
+
+@media (max-width: 782px) {
+	.erd-admin .erd-file-row {
+		align-items: stretch;
+		grid-template-columns: 1fr;
+	}
+}

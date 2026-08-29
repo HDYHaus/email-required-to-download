@@ -32,12 +32,14 @@ class ERD_Frontend {
 	public function shortcode( $atts ) {
 		$atts  = shortcode_atts( array( 'id' => 0 ), $atts, 'email_required_download' );
 		$offer = $this->repository->get_offer( absint( $atts['id'] ) );
+		$files = $offer ? $this->repository->get_offer_files( $offer->id ) : array();
 
-		if ( ! $offer || empty( $offer->file_url ) ) {
+		if ( ! $offer || ! $files ) {
 			return '<div class="erd-message erd-error">' . esc_html__( 'This download is not available.', 'email-required-to-download' ) . '</div>';
 		}
 
-		$message = '';
+		$message   = '';
+		$show_form = true;
 		if ( isset( $_GET['erd_status'], $_GET['erd_offer'] ) && absint( $_GET['erd_offer'] ) === absint( $offer->id ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$status = sanitize_key( wp_unslash( $_GET['erd_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( 'invalid' === $status ) {
@@ -45,8 +47,9 @@ class ERD_Frontend {
 			} elseif ( 'sent' === $status ) {
 				$message = '<div class="erd-message erd-success">' . esc_html__( 'Thanks. Check your inbox for the download link.', 'email-required-to-download' ) . '</div>';
 			} elseif ( 'ready' === $status && ! empty( $_GET['erd_token'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$url     = $this->download_url( sanitize_text_field( wp_unslash( $_GET['erd_token'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$message = '<div class="erd-message erd-success">' . wp_kses_post( $offer->success_message ) . ' <a class="erd-download-button" href="' . esc_url( $url ) . '">' . esc_html( $offer->button_text ) . '</a></div>';
+				$token   = sanitize_text_field( wp_unslash( $_GET['erd_token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$message = '<div class="erd-message erd-success">' . wp_kses_post( $offer->success_message ) . $this->download_links( $token, $files, $offer ) . '</div>';
+				$show_form = false;
 			}
 		}
 
@@ -54,27 +57,29 @@ class ERD_Frontend {
 		?>
 		<div class="erd-download" id="erd-download-<?php echo esc_attr( $offer->id ); ?>">
 			<?php echo $message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			<form class="erd-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-				<input type="hidden" name="action" value="erd_submit_lead">
-				<input type="hidden" name="offer_id" value="<?php echo esc_attr( $offer->id ); ?>">
-				<input type="hidden" name="redirect_to" value="<?php echo esc_url( $this->current_url() ); ?>">
-				<?php wp_nonce_field( 'erd_submit_lead_' . absint( $offer->id ) ); ?>
-				<label>
-					<span><?php esc_html_e( 'Email', 'email-required-to-download' ); ?></span>
-					<input type="email" name="email" required autocomplete="email">
-				</label>
-				<?php if ( $offer->name_required ) : ?>
+			<?php if ( $show_form ) : ?>
+				<form class="erd-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<input type="hidden" name="action" value="erd_submit_lead">
+					<input type="hidden" name="offer_id" value="<?php echo esc_attr( $offer->id ); ?>">
+					<input type="hidden" name="redirect_to" value="<?php echo esc_url( $this->current_url() ); ?>">
+					<?php wp_nonce_field( 'erd_submit_lead_' . absint( $offer->id ) ); ?>
 					<label>
-						<span><?php esc_html_e( 'Name', 'email-required-to-download' ); ?></span>
-						<input type="text" name="name" required autocomplete="name">
+						<span><?php esc_html_e( 'Email', 'email-required-to-download' ); ?></span>
+						<input type="email" name="email" required autocomplete="email">
 					</label>
-				<?php endif; ?>
-				<label class="erd-consent">
-					<input type="checkbox" name="consent" value="1" required>
-					<span><?php echo wp_kses_post( $offer->consent_text ); ?></span>
-				</label>
-				<button type="submit"><?php echo esc_html( $offer->button_text ); ?></button>
-			</form>
+					<?php if ( $offer->name_required ) : ?>
+						<label>
+							<span><?php esc_html_e( 'Name', 'email-required-to-download' ); ?></span>
+							<input type="text" name="name" required autocomplete="name">
+						</label>
+					<?php endif; ?>
+					<label class="erd-consent">
+						<input type="checkbox" name="consent" value="1" required>
+						<span><?php echo wp_kses_post( $offer->consent_text ); ?></span>
+					</label>
+					<button type="submit"><?php echo esc_html( $offer->button_text ); ?></button>
+				</form>
+			<?php endif; ?>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -109,6 +114,7 @@ class ERD_Frontend {
 				'token'            => 'pending',
 				'token_expires_at' => gmdate( 'Y-m-d H:i:s', $expires ),
 				'consent_text'     => $offer->consent_text,
+				'email_status'     => $offer->require_confirmation ? 'pending' : 'not_required',
 				'referrer'         => wp_get_referer() ? wp_get_referer() : '',
 				'ip_hash'          => $this->hash_ip(),
 				'user_agent'       => isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_textarea_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '',
@@ -119,7 +125,8 @@ class ERD_Frontend {
 		$this->repository->update_lead_token( $lead_id, $token );
 
 		if ( $offer->require_confirmation ) {
-			$this->send_confirmation_email( $email, $offer, $token );
+			$sent = $this->send_confirmation_email( $email, $offer, $this->access_url( $redirect, $offer_id, $token ) );
+			$this->repository->update_lead_email_status( $lead_id, $sent ? 'sent' : 'failed' );
 			wp_safe_redirect( add_query_arg( array( 'erd_status' => 'sent', 'erd_offer' => $offer_id ), $redirect ) );
 			exit;
 		}
@@ -138,17 +145,18 @@ class ERD_Frontend {
 
 		$lead  = $this->repository->get_lead_by_token( $token );
 		$offer = $this->repository->get_offer( $parts['offer_id'] );
+		$file  = $this->repository->get_offer_file( $parts['offer_id'], isset( $_GET['file_id'] ) ? absint( $_GET['file_id'] ) : 0 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( ! $lead || ! $offer || absint( $lead->id ) !== $parts['lead_id'] || absint( $lead->offer_id ) !== $parts['offer_id'] ) {
+		if ( ! $lead || ! $offer || ! $file || absint( $lead->id ) !== $parts['lead_id'] || absint( $lead->offer_id ) !== $parts['offer_id'] ) {
 			wp_die( esc_html__( 'This download link is invalid.', 'email-required-to-download' ), 403 );
 		}
 
 		$this->repository->mark_downloaded( $lead->id );
-		wp_safe_redirect( esc_url_raw( $offer->file_url ) );
+		wp_safe_redirect( esc_url_raw( $file->file_url ) );
 		exit;
 	}
 
-	private function send_confirmation_email( $email, $offer, $token ) {
+	private function send_confirmation_email( $email, $offer, $access_url ) {
 		$subject = sprintf(
 			/* translators: %s: offer title */
 			__( 'Your download: %s', 'email-required-to-download' ),
@@ -158,18 +166,49 @@ class ERD_Frontend {
 			/* translators: 1: offer title, 2: download URL */
 			__( "Thanks for requesting %1\$s.\n\nDownload it here:\n%2\$s", 'email-required-to-download' ),
 			$offer->title,
-			$this->download_url( $token )
+			$access_url
 		);
 
-		wp_mail( $email, $subject, $message );
+		return wp_mail( $email, $subject, $message );
 	}
 
-	private function download_url( $token ) {
+	private function download_links( $token, array $files, $offer ) {
+		if ( 1 === count( $files ) ) {
+			return ' <a class="erd-download-button" href="' . esc_url( $this->download_url( $token, $files[0]->id ) ) . '">' . esc_html( $offer->button_text ) . '</a>';
+		}
+
+		$output = '<div class="erd-download-list">';
+		foreach ( $files as $file ) {
+			$label   = $file->file_label ? $file->file_label : $this->file_label_from_url( $file->file_url );
+			$output .= '<a class="erd-download-button" href="' . esc_url( $this->download_url( $token, $file->id ) ) . '">' . esc_html( $label ) . '</a>';
+		}
+		$output .= '</div>';
+
+		return $output;
+	}
+
+	private function access_url( $redirect, $offer_id, $token ) {
 		return add_query_arg(
 			array(
-				'action' => 'erd_download',
-				'token'  => $token,
+				'erd_status' => 'ready',
+				'erd_offer'  => absint( $offer_id ),
+				'erd_token'  => $token,
 			),
+			$redirect
+		);
+	}
+
+	private function download_url( $token, $file_id = 0 ) {
+		$args = array(
+			'action' => 'erd_download',
+			'token'  => $token,
+		);
+		if ( $file_id ) {
+			$args['file_id'] = absint( $file_id );
+		}
+
+		return add_query_arg(
+			$args,
 			admin_url( 'admin-post.php' )
 		);
 	}
@@ -179,6 +218,15 @@ class ERD_Frontend {
 		$host   = isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : wp_parse_url( home_url(), PHP_URL_HOST );
 		$uri    = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
 		return esc_url_raw( $scheme . $host . $uri );
+	}
+
+	private function file_label_from_url( $file_url ) {
+		$path = wp_parse_url( $file_url, PHP_URL_PATH );
+		if ( $path ) {
+			return basename( $path );
+		}
+
+		return __( 'Download file', 'email-required-to-download' );
 	}
 
 	private function hash_ip() {
