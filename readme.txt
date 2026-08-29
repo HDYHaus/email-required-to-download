@@ -4,7 +4,7 @@ Tags: downloads, lead capture, email, media
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,9 @@ Email Required to Download lets site owners create gated download offers, collec
 3. Open Email Downloads to create your first offer.
 
 == Changelog ==
+
+= 1.1.2 =
+* Refresh admin asset version for field styling updates.
 
 = 1.1.1 =
 * Replace the separate public download title field with an option to show the offer title on the form.

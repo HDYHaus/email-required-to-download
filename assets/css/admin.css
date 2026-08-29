@@ -54,15 +54,15 @@
 .erd-admin-form-page input[type="text"],
 .erd-admin-form-page input[type="url"],
 .erd-admin-form-page textarea {
-	background: #fff;
-	border: 1px solid #b8c1cc;
-	border-radius: 6px;
-	box-shadow: none;
+	background: #fff !important;
+	border: 1px solid #9aa8b7 !important;
+	border-radius: 7px !important;
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.025) !important;
 	color: #1d2327;
 	font-size: 14px;
 	line-height: 1.45;
-	min-height: 42px;
-	padding: 8px 12px;
+	min-height: 44px !important;
+	padding: 9px 12px !important;
 	transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 
@@ -71,8 +71,8 @@
 .erd-admin-form-page input[type="text"]:focus,
 .erd-admin-form-page input[type="url"]:focus,
 .erd-admin-form-page textarea:focus {
-	border-color: #2271b1;
-	box-shadow: 0 0 0 1px #2271b1, 0 0 0 4px rgba(34, 113, 177, 0.12);
+	border-color: #2271b1 !important;
+	box-shadow: 0 0 0 1px #2271b1, 0 0 0 4px rgba(34, 113, 177, 0.14) !important;
 	outline: 2px solid transparent;
 }
 
