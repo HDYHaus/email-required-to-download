@@ -40,6 +40,7 @@ class ERD_Frontend {
 
 		$message   = '';
 		$show_form = true;
+		$settings  = $this->repository->get_settings();
 		if ( isset( $_GET['erd_status'], $_GET['erd_offer'] ) && absint( $_GET['erd_offer'] ) === absint( $offer->id ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$status = sanitize_key( wp_unslash( $_GET['erd_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( 'invalid' === $status ) {
@@ -83,6 +84,19 @@ class ERD_Frontend {
 						<input type="checkbox" name="consent" value="1" required>
 						<span><?php echo wp_kses_post( $offer->consent_text ); ?></span>
 					</label>
+					<?php if ( $offer->require_confirmation ) : ?>
+						<p class="erd-hint">
+							<?php
+							echo esc_html(
+								sprintf(
+									/* translators: %s: human-readable token expiry duration */
+									__( 'We will email your download link. The link expires in %s.', 'email-required-to-download' ),
+									$this->token_expiry_label( $settings['token_expiry_hours'] )
+								)
+							);
+							?>
+						</p>
+					<?php endif; ?>
 					<button type="submit"><?php echo esc_html( $offer->button_text ); ?></button>
 				</form>
 			<?php endif; ?>
@@ -169,10 +183,11 @@ class ERD_Frontend {
 			$offer->title
 		);
 		$message = sprintf(
-			/* translators: 1: offer title, 2: download URL */
-			__( "Thanks for requesting %1\$s.\n\nDownload it here:\n%2\$s", 'email-required-to-download' ),
+			/* translators: 1: offer title, 2: download URL, 3: human-readable token expiry duration */
+			__( "Thanks for requesting %1\$s.\n\nDownload it here:\n%2\$s\n\nThis link expires in %3\$s.", 'email-required-to-download' ),
 			$offer->title,
-			$access_url
+			$access_url,
+			$this->token_expiry_label( $this->repository->get_settings()['token_expiry_hours'] )
 		);
 
 		return wp_mail( $email, $subject, $message );
@@ -251,6 +266,15 @@ class ERD_Frontend {
 		}
 
 		return __( 'Download file', 'email-required-to-download' );
+	}
+
+	private function token_expiry_label( $hours ) {
+		$hours = max( 1, absint( $hours ) );
+		return sprintf(
+			/* translators: %d: number of hours */
+			_n( '%d hour', '%d hours', $hours, 'email-required-to-download' ),
+			$hours
+		);
 	}
 
 	private function hash_ip() {

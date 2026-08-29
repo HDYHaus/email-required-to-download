@@ -149,7 +149,7 @@ class ERD_Admin {
 			);
 		}
 		?>
-		<div class="wrap erd-admin erd-admin-form-page">
+		<div class="wrap erd-admin">
 			<?php $this->notice(); ?>
 			<h1><?php echo $offer ? esc_html__( 'Edit Offer', 'email-required-to-download' ) : esc_html__( 'Add Offer', 'email-required-to-download' ); ?></h1>
 			<?php if ( $offer ) : ?>
@@ -165,11 +165,17 @@ class ERD_Admin {
 				<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row"><label for="erd-title"><?php esc_html_e( 'Offer title', 'email-required-to-download' ); ?></label></th>
-						<td><input class="regular-text" id="erd-title" name="title" required value="<?php echo esc_attr( $data['title'] ); ?>"></td>
+						<td>
+							<input class="regular-text" id="erd-title" name="title" required value="<?php echo esc_attr( $data['title'] ); ?>">
+							<p class="description"><?php esc_html_e( 'Used to identify this offer in admin. You can also show it above the public form.', 'email-required-to-download' ); ?></p>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Display options', 'email-required-to-download' ); ?></th>
-						<td><label><input type="checkbox" name="show_title" value="1" <?php checked( $data['show_title'] ); ?>> <?php esc_html_e( 'Show offer title on the download form', 'email-required-to-download' ); ?></label></td>
+						<td>
+							<label><input type="checkbox" name="show_title" value="1" <?php checked( $data['show_title'] ); ?>> <?php esc_html_e( 'Show offer title on the download form', 'email-required-to-download' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Leave unchecked if your page already introduces the download.', 'email-required-to-download' ); ?></p>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="erd-description"><?php esc_html_e( 'Description', 'email-required-to-download' ); ?></label></th>
@@ -187,6 +193,7 @@ class ERD_Admin {
 								)
 							);
 							?>
+							<p class="description"><?php esc_html_e( 'Optional text shown above the email form.', 'email-required-to-download' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -204,11 +211,15 @@ class ERD_Admin {
 								<?php endforeach; ?>
 							</div>
 							<p><button type="button" class="button erd-add-file"><?php esc_html_e( 'Add File', 'email-required-to-download' ); ?></button></p>
+							<p class="description"><?php esc_html_e( 'Visitors submit the form once to unlock every file in this offer.', 'email-required-to-download' ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="erd-button-text"><?php esc_html_e( 'Button text', 'email-required-to-download' ); ?></label></th>
-						<td><input class="regular-text" id="erd-button-text" name="button_text" value="<?php echo esc_attr( $data['button_text'] ); ?>"></td>
+						<td>
+							<input class="regular-text" id="erd-button-text" name="button_text" value="<?php echo esc_attr( $data['button_text'] ); ?>">
+							<p class="description"><?php esc_html_e( 'Shown on the form submit button and single-file download button.', 'email-required-to-download' ); ?></p>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Button colors', 'email-required-to-download' ); ?></th>
@@ -227,6 +238,7 @@ class ERD_Admin {
 									<input type="color" name="button_text_color" value="<?php echo esc_attr( $data['button_text_color'] ? $data['button_text_color'] : '#ffffff' ); ?>">
 								</label>
 							</div>
+							<p class="description"><?php esc_html_e( 'Optional. Leave custom colors off to use the default button style.', 'email-required-to-download' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -245,6 +257,7 @@ class ERD_Admin {
 								)
 							);
 							?>
+							<p class="description"><?php esc_html_e( 'Shown after a visitor submits the form or opens a valid confirmation link.', 'email-required-to-download' ); ?></p>
 						</td>
 					</tr>
 					<tr>
@@ -252,11 +265,15 @@ class ERD_Admin {
 						<td>
 							<label><input type="checkbox" name="name_required" value="1" <?php checked( $data['name_required'] ); ?>> <?php esc_html_e( 'Require name field', 'email-required-to-download' ); ?></label><br>
 							<label><input type="checkbox" name="require_confirmation" value="1" <?php checked( $data['require_confirmation'] ); ?>> <?php esc_html_e( 'Require email confirmation before download', 'email-required-to-download' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Email confirmation sends a link instead of showing downloads immediately.', 'email-required-to-download' ); ?></p>
 						</td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="erd-consent-text"><?php esc_html_e( 'Consent text', 'email-required-to-download' ); ?></label></th>
-						<td><textarea class="large-text" rows="3" id="erd-consent-text" name="consent_text" required><?php echo esc_textarea( $data['consent_text'] ); ?></textarea></td>
+						<td>
+							<textarea class="large-text" rows="3" id="erd-consent-text" name="consent_text" required><?php echo esc_textarea( $data['consent_text'] ); ?></textarea>
+							<p class="description"><?php esc_html_e( 'Required checkbox text shown on the public form.', 'email-required-to-download' ); ?></p>
+						</td>
 					</tr>
 				</table>
 				<?php submit_button( __( 'Save Offer', 'email-required-to-download' ) ); ?>
@@ -271,7 +288,7 @@ class ERD_Admin {
 		$stats    = $this->repository->get_offer_stats( $offer_id );
 		$leads    = $this->repository->get_leads( $offer_id, 100 );
 		?>
-		<div class="wrap erd-admin">
+		<div class="wrap erd-admin erd-admin-form-page">
 			<h1><?php esc_html_e( 'Leads & Analytics', 'email-required-to-download' ); ?></h1>
 			<div class="erd-stats">
 				<div><strong><?php echo esc_html( $stats['submissions'] ); ?></strong><span><?php esc_html_e( 'Submissions', 'email-required-to-download' ); ?></span></div>
@@ -317,7 +334,7 @@ class ERD_Admin {
 		$this->notice();
 		$settings = $this->repository->get_settings();
 		?>
-		<div class="wrap erd-admin">
+		<div class="wrap erd-admin erd-admin-form-page">
 			<h1><?php esc_html_e( 'Settings', 'email-required-to-download' ); ?></h1>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="erd_save_settings">
@@ -325,17 +342,24 @@ class ERD_Admin {
 				<table class="form-table" role="presentation">
 					<tr>
 						<th scope="row"><label for="erd-token-expiry"><?php esc_html_e( 'Token expiry hours', 'email-required-to-download' ); ?></label></th>
-						<td><input id="erd-token-expiry" type="number" min="1" max="720" name="token_expiry_hours" value="<?php echo esc_attr( $settings['token_expiry_hours'] ); ?>"></td>
+						<td>
+							<input id="erd-token-expiry" type="number" min="1" max="720" name="token_expiry_hours" value="<?php echo esc_attr( $settings['token_expiry_hours'] ); ?>">
+							<p class="description"><?php esc_html_e( 'How long confirmation links stay valid after someone submits the form.', 'email-required-to-download' ); ?></p>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="erd-default-button"><?php esc_html_e( 'Default button text', 'email-required-to-download' ); ?></label></th>
-						<td><input id="erd-default-button" class="regular-text" name="default_button_text" value="<?php echo esc_attr( $settings['default_button_text'] ); ?>"></td>
+						<td>
+							<input id="erd-default-button" class="regular-text" name="default_button_text" value="<?php echo esc_attr( $settings['default_button_text'] ); ?>">
+							<p class="description"><?php esc_html_e( 'Used when creating new offers. Existing offers keep their own button text.', 'email-required-to-download' ); ?></p>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'IP hash salt', 'email-required-to-download' ); ?></th>
 						<td>
 							<code><?php echo esc_html( substr( $settings['ip_hash_salt'], 0, 8 ) ); ?>...</code><br>
 							<label><input type="checkbox" name="regenerate_ip_salt" value="1"> <?php esc_html_e( 'Regenerate salt for future leads', 'email-required-to-download' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Used to store privacy-friendlier hashed IP addresses instead of raw IPs.', 'email-required-to-download' ); ?></p>
 						</td>
 					</tr>
 				</table>
