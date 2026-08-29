@@ -2,11 +2,11 @@
 
 Require an email address before visitors can download a file.
 
-Version: 1.1.2
+Version: 1.1.3
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,6 +23,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 - Embed offers with `[email_required_download id="123"]`.
 - Collect email, optional name, and required consent.
 - Support immediate downloads or email-confirmed download links per offer.
+- Set optional per-offer button colors.
 - Unlock multiple files from a single email submission.
 - Store leads locally in WordPress.
 - Track submissions, unique emails, and downloads.

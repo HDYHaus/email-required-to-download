@@ -55,7 +55,7 @@ class ERD_Frontend {
 
 		ob_start();
 		?>
-		<div class="erd-download" id="erd-download-<?php echo esc_attr( $offer->id ); ?>">
+		<div class="erd-download" id="erd-download-<?php echo esc_attr( $offer->id ); ?>"<?php echo $this->button_style_attr( $offer ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<?php if ( ! empty( $offer->show_title ) ) : ?>
 				<h2 class="erd-title"><?php echo esc_html( $offer->title ); ?></h2>
 			<?php endif; ?>
@@ -191,6 +191,24 @@ class ERD_Frontend {
 		$output .= '</div>';
 
 		return $output;
+	}
+
+	private function button_style_attr( $offer ) {
+		if ( empty( $offer->use_button_colors ) ) {
+			return '';
+		}
+
+		$styles = array();
+		$bg_color = ! empty( $offer->button_bg_color ) ? sanitize_hex_color( $offer->button_bg_color ) : '';
+		if ( $bg_color ) {
+			$styles[] = '--erd-button-bg:' . $bg_color;
+		}
+		$text_color = ! empty( $offer->button_text_color ) ? sanitize_hex_color( $offer->button_text_color ) : '';
+		if ( $text_color ) {
+			$styles[] = '--erd-button-color:' . $text_color;
+		}
+
+		return $styles ? ' style="' . esc_attr( implode( ';', $styles ) ) . '"' : '';
 	}
 
 	private function access_url( $redirect, $offer_id, $token ) {

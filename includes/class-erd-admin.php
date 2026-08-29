@@ -130,6 +130,9 @@ class ERD_Admin {
 			'file_id'              => 0,
 			'file_url'             => '',
 			'button_text'          => $settings['default_button_text'],
+			'use_button_colors'    => 0,
+			'button_bg_color'      => '',
+			'button_text_color'    => '',
 			'success_message'      => __( 'Thanks. Your download is ready.', 'email-required-to-download' ),
 			'name_required'        => 0,
 			'require_confirmation' => 0,
@@ -206,6 +209,25 @@ class ERD_Admin {
 					<tr>
 						<th scope="row"><label for="erd-button-text"><?php esc_html_e( 'Button text', 'email-required-to-download' ); ?></label></th>
 						<td><input class="regular-text" id="erd-button-text" name="button_text" value="<?php echo esc_attr( $data['button_text'] ); ?>"></td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Button colors', 'email-required-to-download' ); ?></th>
+						<td>
+							<div class="erd-color-fields">
+								<label class="erd-color-toggle">
+									<input type="checkbox" name="use_button_colors" value="1" <?php checked( $data['use_button_colors'] ); ?>>
+									<span><?php esc_html_e( 'Use custom colors', 'email-required-to-download' ); ?></span>
+								</label>
+								<label>
+									<span><?php esc_html_e( 'Background', 'email-required-to-download' ); ?></span>
+									<input type="color" name="button_bg_color" value="<?php echo esc_attr( $data['button_bg_color'] ? $data['button_bg_color'] : '#1d2327' ); ?>">
+								</label>
+								<label>
+									<span><?php esc_html_e( 'Text', 'email-required-to-download' ); ?></span>
+									<input type="color" name="button_text_color" value="<?php echo esc_attr( $data['button_text_color'] ? $data['button_text_color'] : '#ffffff' ); ?>">
+								</label>
+							</div>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="erd-success-message"><?php esc_html_e( 'Success message', 'email-required-to-download' ); ?></label></th>
@@ -354,6 +376,9 @@ class ERD_Admin {
 			'description'          => isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '',
 			'files'                => $files,
 			'button_text'          => isset( $_POST['button_text'] ) ? sanitize_text_field( wp_unslash( $_POST['button_text'] ) ) : '',
+			'use_button_colors'    => ! empty( $_POST['use_button_colors'] ),
+			'button_bg_color'      => isset( $_POST['button_bg_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['button_bg_color'] ) ) : '',
+			'button_text_color'    => isset( $_POST['button_text_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['button_text_color'] ) ) : '',
 			'success_message'      => isset( $_POST['success_message'] ) ? wp_kses_post( wp_unslash( $_POST['success_message'] ) ) : '',
 			'name_required'        => ! empty( $_POST['name_required'] ),
 			'require_confirmation' => ! empty( $_POST['require_confirmation'] ),

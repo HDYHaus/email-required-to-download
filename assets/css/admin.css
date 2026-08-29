@@ -125,6 +125,28 @@
 	white-space: nowrap;
 }
 
+.erd-admin .erd-color-fields {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+}
+
+.erd-admin .erd-color-fields .erd-color-toggle {
+	flex-basis: 100%;
+}
+
+.erd-admin .erd-color-fields label {
+	align-items: center;
+	display: flex;
+	gap: 8px;
+}
+
+.erd-admin .erd-color-fields input[type="color"] {
+	height: 36px;
+	padding: 2px;
+	width: 48px;
+}
+
 @media (max-width: 1100px) {
 	.erd-admin .erd-file-row {
 		align-items: stretch;

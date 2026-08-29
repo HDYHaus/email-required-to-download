@@ -54,8 +54,10 @@ class ERD_Repository {
 
 	public function save_offer( array $data, $id = 0 ) {
 		global $wpdb;
-		$files = $this->normalize_files( isset( $data['files'] ) && is_array( $data['files'] ) ? $data['files'] : array() );
-		$first = $files ? $files[0] : array( 'file_id' => 0, 'file_url' => '' );
+		$files             = $this->normalize_files( isset( $data['files'] ) && is_array( $data['files'] ) ? $data['files'] : array() );
+		$first             = $files ? $files[0] : array( 'file_id' => 0, 'file_url' => '' );
+		$button_bg_color   = isset( $data['button_bg_color'] ) ? sanitize_hex_color( $data['button_bg_color'] ) : '';
+		$button_text_color = isset( $data['button_text_color'] ) ? sanitize_hex_color( $data['button_text_color'] ) : '';
 
 		$now     = current_time( 'mysql' );
 		$payload = array(
@@ -65,6 +67,9 @@ class ERD_Repository {
 			'file_id'              => absint( $first['file_id'] ),
 			'file_url'             => esc_url_raw( $first['file_url'] ),
 			'button_text'          => $data['button_text'],
+			'use_button_colors'    => ! empty( $data['use_button_colors'] ) ? 1 : 0,
+			'button_bg_color'      => $button_bg_color ? $button_bg_color : '',
+			'button_text_color'    => $button_text_color ? $button_text_color : '',
 			'success_message'      => $data['success_message'],
 			'name_required'        => ! empty( $data['name_required'] ) ? 1 : 0,
 			'require_confirmation' => ! empty( $data['require_confirmation'] ) ? 1 : 0,

@@ -40,9 +40,9 @@
 .erd-form button,
 .erd-download-button {
 	align-self: start;
-	background: #1d2327;
+	background: var(--erd-button-bg, #1d2327);
 	border: 0;
-	color: #fff;
+	color: var(--erd-button-color, #fff);
 	cursor: pointer;
 	display: inline-block;
 	padding: 10px 16px;
