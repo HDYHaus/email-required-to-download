@@ -7,10 +7,35 @@
 	"icon": "download",
 	"description": "Show an Email Required to Download offer.",
 	"textdomain": "email-required-to-download",
+	"editorStyle": "file:./editor.css",
 	"attributes": {
 		"offerId": {
 			"type": "number",
 			"default": 0
+		},
+		"titleMode": {
+			"type": "string",
+			"default": "offer"
+		},
+		"descriptionMode": {
+			"type": "string",
+			"default": "offer"
+		},
+		"buttonText": {
+			"type": "string",
+			"default": ""
+		},
+		"useButtonColors": {
+			"type": "boolean",
+			"default": false
+		},
+		"buttonBgColor": {
+			"type": "string",
+			"default": ""
+		},
+		"buttonTextColor": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"supports": {

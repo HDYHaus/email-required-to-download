@@ -21,7 +21,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 - Optionally show the offer title and description on the download form.
 - Select or upload one or more files from the Media Library.
 - Embed offers with `[email_required_download id="123"]`.
-- Insert offers with the Email Required Download block.
+- Insert offers with the Email Required Download block and adjust display settings in the editor.
 - Collect email, optional name, and required consent.
 - Support immediate downloads or email-confirmed download links per offer.
 - Choose public URL delivery or protected private-file delivery with direct protected uploads.

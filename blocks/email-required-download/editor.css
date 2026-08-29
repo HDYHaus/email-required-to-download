@@ -1,0 +1,32 @@
+.erd-block-editor {
+	border: 1px solid #dcdcde;
+	padding: 12px;
+}
+
+.erd-block-editor-toolbar {
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	margin-bottom: 12px;
+	padding: 12px;
+}
+
+.erd-block-editor-toolbar .components-base-control {
+	margin-bottom: 0;
+}
+
+.erd-block-color-control {
+	display: grid;
+	gap: 6px;
+	margin-bottom: 16px;
+}
+
+.erd-block-color-control span {
+	font-size: 11px;
+	font-weight: 500;
+	text-transform: uppercase;
+}
+
+.erd-block-color-control input {
+	height: 36px;
+	width: 54px;
+}

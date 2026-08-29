@@ -34,7 +34,7 @@ class ERD_Frontend {
 		return $this->render_offer( absint( $atts['id'] ) );
 	}
 
-	public function render_offer( $offer_id ) {
+	public function render_offer( $offer_id, array $display_args = array() ) {
 		$offer = $this->repository->get_offer( absint( $offer_id ) );
 		$files = $offer ? $this->repository->get_offer_files( $offer->id ) : array();
 
@@ -42,6 +42,9 @@ class ERD_Frontend {
 			return '<div class="erd-message erd-error">' . esc_html__( 'This download is not available.', 'email-required-to-download' ) . '</div>';
 		}
 
+		$offer            = $this->apply_display_args( $offer, $display_args );
+		$show_title       = $this->display_enabled( $display_args, 'title_mode', ! empty( $offer->show_title ) );
+		$show_description = $this->display_enabled( $display_args, 'description_mode', ! empty( $offer->description ) );
 		$message   = '';
 		$show_form = true;
 		$settings  = $this->repository->get_settings();
@@ -67,10 +70,10 @@ class ERD_Frontend {
 		ob_start();
 		?>
 		<div class="erd-download" id="erd-download-<?php echo esc_attr( $offer->id ); ?>"<?php echo $this->button_style_attr( $offer ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<?php if ( ! empty( $offer->show_title ) ) : ?>
+			<?php if ( $show_title ) : ?>
 				<h2 class="erd-title"><?php echo esc_html( $offer->title ); ?></h2>
 			<?php endif; ?>
-			<?php if ( ! empty( $offer->description ) ) : ?>
+			<?php if ( $show_description && ! empty( $offer->description ) ) : ?>
 				<div class="erd-description"><?php echo wp_kses_post( wpautop( $offer->description ) ); ?></div>
 			<?php endif; ?>
 			<?php echo $message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -221,6 +224,38 @@ class ERD_Frontend {
 		$output .= '</div>';
 
 		return $output;
+	}
+
+	private function apply_display_args( $offer, array $display_args ) {
+		$offer = clone $offer;
+
+		if ( ! empty( $display_args['button_text'] ) ) {
+			$offer->button_text = $display_args['button_text'];
+		}
+
+		if ( ! empty( $display_args['use_button_colors'] ) ) {
+			$offer->use_button_colors = 1;
+			if ( ! empty( $display_args['button_bg_color'] ) ) {
+				$offer->button_bg_color = $display_args['button_bg_color'];
+			}
+			if ( ! empty( $display_args['button_text_color'] ) ) {
+				$offer->button_text_color = $display_args['button_text_color'];
+			}
+		}
+
+		return $offer;
+	}
+
+	private function display_enabled( array $display_args, $key, $offer_default ) {
+		$mode = isset( $display_args[ $key ] ) ? $display_args[ $key ] : 'offer';
+		if ( 'show' === $mode ) {
+			return true;
+		}
+		if ( 'hide' === $mode ) {
+			return false;
+		}
+
+		return $offer_default;
 	}
 
 	private function stream_protected_file( $file, $force_download ) {

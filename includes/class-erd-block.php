@@ -50,7 +50,21 @@ class ERD_Block {
 
 	public function render( $attributes ) {
 		$offer_id = isset( $attributes['offerId'] ) ? absint( $attributes['offerId'] ) : 0;
-		return $offer_id ? $this->frontend->render_offer( $offer_id ) : '';
+		return $offer_id ? $this->frontend->render_offer( $offer_id, $this->display_args( $attributes ) ) : '';
+	}
+
+	private function display_args( $attributes ) {
+		$title_mode       = isset( $attributes['titleMode'] ) ? sanitize_key( $attributes['titleMode'] ) : 'offer';
+		$description_mode = isset( $attributes['descriptionMode'] ) ? sanitize_key( $attributes['descriptionMode'] ) : 'offer';
+
+		return array(
+			'title_mode'        => in_array( $title_mode, array( 'offer', 'show', 'hide' ), true ) ? $title_mode : 'offer',
+			'description_mode'  => in_array( $description_mode, array( 'offer', 'show', 'hide' ), true ) ? $description_mode : 'offer',
+			'button_text'       => isset( $attributes['buttonText'] ) ? sanitize_text_field( $attributes['buttonText'] ) : '',
+			'use_button_colors' => ! empty( $attributes['useButtonColors'] ),
+			'button_bg_color'   => isset( $attributes['buttonBgColor'] ) ? sanitize_hex_color( $attributes['buttonBgColor'] ) : '',
+			'button_text_color' => isset( $attributes['buttonTextColor'] ) ? sanitize_hex_color( $attributes['buttonTextColor'] ) : '',
+		);
 	}
 
 	private function block_offers() {

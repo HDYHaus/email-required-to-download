@@ -42,7 +42,7 @@ Email Required to Download lets site owners create gated download offers, collec
 == Changelog ==
 
 = 1.2.0 =
-* Add a dynamic Email Required Download block for the block editor.
+* Add a dynamic Email Required Download block with offer selection and display controls.
 * Add protected delivery mode that copies Media Library files into private plugin storage and streams them after token validation.
 * Add optional force-download behavior for protected files.
 * Show a visitor-facing error when confirmation email delivery fails.
