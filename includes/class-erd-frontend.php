@@ -72,7 +72,7 @@ class ERD_Frontend {
 				<form class="erd-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<input type="hidden" name="action" value="erd_submit_lead">
 					<input type="hidden" name="offer_id" value="<?php echo esc_attr( $offer->id ); ?>">
-					<input type="hidden" name="redirect_to" value="<?php echo esc_url( $this->current_url() ); ?>">
+					<input type="hidden" name="redirect_to" value="<?php echo esc_url( $this->redirect_url( $offer->id ) ); ?>">
 					<?php wp_nonce_field( 'erd_submit_lead_' . absint( $offer->id ) ); ?>
 					<label>
 						<span><?php esc_html_e( 'Email', 'email-required-to-download' ); ?></span>
@@ -262,6 +262,11 @@ class ERD_Frontend {
 		$host   = isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : wp_parse_url( home_url(), PHP_URL_HOST );
 		$uri    = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
 		return esc_url_raw( $scheme . $host . $uri );
+	}
+
+	private function redirect_url( $offer_id ) {
+		$url = remove_query_arg( array( 'erd_status', 'erd_offer', 'erd_token' ), $this->current_url() );
+		return $url . '#erd-download-' . absint( $offer_id );
 	}
 
 	private function file_label_from_url( $file_url ) {

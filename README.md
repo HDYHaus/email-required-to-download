@@ -26,6 +26,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 - Set optional per-offer button colors.
 - Show helpful form hints for admins and visitors.
 - Unlock multiple files from a single email submission.
+- Return visitors to the submitted form after lead capture.
 - Store leads locally in WordPress.
 - Track submissions, unique emails, and downloads.
 - Show confirmation email send status for leads.

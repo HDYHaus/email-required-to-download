@@ -25,6 +25,7 @@ Email Required to Download lets site owners create gated download offers, collec
 * Set optional per-offer button colors.
 * Show helpful form hints for admins and visitors.
 * Unlock multiple files from a single email submission.
+* Return visitors to the submitted form after lead capture.
 * Store leads locally in WordPress.
 * Track submissions, unique emails, and downloads.
 * Export lead and download data as CSV.
@@ -41,6 +42,7 @@ Email Required to Download lets site owners create gated download offers, collec
 * Add optional per-offer button background and text colors.
 * Add admin field hints and visitor-facing confirmation link expiry hints.
 * Validate ready links before showing download buttons and count only the first download per lead.
+* Return lead capture redirects to the submitted shortcode.
 
 = 1.1.2 =
 * Refresh admin asset version for field styling updates.
