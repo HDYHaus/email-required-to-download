@@ -29,25 +29,59 @@
 	margin: 16px 0;
 }
 
-.erd-admin-edit {
+.erd-admin-form-page {
 	max-width: 980px;
 }
 
-.erd-admin-edit .form-table th {
+.erd-admin-form-page .form-table {
+	margin-top: 18px;
+}
+
+.erd-admin-form-page .form-table th {
 	padding-left: 0;
+	padding-top: 22px;
 	width: 150px;
 }
 
-.erd-admin-edit .form-table td {
+.erd-admin-form-page .form-table td {
 	max-width: 760px;
+	padding-bottom: 18px;
+	padding-top: 16px;
 }
 
-.erd-admin-edit .regular-text,
-.erd-admin-edit .large-text {
+.erd-admin-form-page input[type="email"],
+.erd-admin-form-page input[type="number"],
+.erd-admin-form-page input[type="text"],
+.erd-admin-form-page input[type="url"],
+.erd-admin-form-page textarea {
+	border-color: #c3c4c7;
+	border-radius: 4px;
+	box-shadow: none;
+	min-height: 36px;
+	padding: 6px 10px;
+}
+
+.erd-admin-form-page input[type="email"]:focus,
+.erd-admin-form-page input[type="number"]:focus,
+.erd-admin-form-page input[type="text"]:focus,
+.erd-admin-form-page input[type="url"]:focus,
+.erd-admin-form-page textarea:focus {
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+	outline: 2px solid transparent;
+}
+
+.erd-admin-form-page .regular-text,
+.erd-admin-form-page .large-text {
 	max-width: 100%;
+	width: 100%;
 }
 
-.erd-admin-edit .wp-editor-wrap {
+.erd-admin-form-page input[type="number"] {
+	max-width: 120px;
+}
+
+.erd-admin-form-page .wp-editor-wrap {
 	max-width: 760px;
 }
 
@@ -90,7 +124,7 @@
 }
 
 @media (max-width: 782px) {
-	.erd-admin-edit .form-table th {
+	.erd-admin-form-page .form-table th {
 		width: auto;
 	}
 

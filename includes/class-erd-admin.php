@@ -76,7 +76,7 @@ class ERD_Admin {
 		$this->notice();
 		$offers = $this->repository->get_offers();
 		?>
-		<div class="wrap erd-admin erd-admin-edit">
+		<div class="wrap erd-admin erd-admin-form-page erd-admin-edit">
 			<h1 class="wp-heading-inline"><?php esc_html_e( 'Email Downloads', 'email-required-to-download' ); ?></h1>
 			<a class="page-title-action" href="<?php echo esc_url( $this->admin_url( 'erd-edit-offer' ) ); ?>"><?php esc_html_e( 'Add New', 'email-required-to-download' ); ?></a>
 			<hr class="wp-header-end">
@@ -146,7 +146,7 @@ class ERD_Admin {
 			);
 		}
 		?>
-		<div class="wrap erd-admin">
+		<div class="wrap erd-admin erd-admin-form-page">
 			<?php $this->notice(); ?>
 			<h1><?php echo $offer ? esc_html__( 'Edit Offer', 'email-required-to-download' ) : esc_html__( 'Add Offer', 'email-required-to-download' ); ?></h1>
 			<?php if ( $offer ) : ?>
