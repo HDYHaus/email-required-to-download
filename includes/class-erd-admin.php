@@ -147,7 +147,14 @@ class ERD_Admin {
 		}
 		?>
 		<div class="wrap erd-admin">
+			<?php $this->notice(); ?>
 			<h1><?php echo $offer ? esc_html__( 'Edit Offer', 'email-required-to-download' ) : esc_html__( 'Add Offer', 'email-required-to-download' ); ?></h1>
+			<?php if ( $offer ) : ?>
+				<p class="erd-shortcode">
+					<strong><?php esc_html_e( 'Shortcode:', 'email-required-to-download' ); ?></strong>
+					<code>[email_required_download id="<?php echo esc_attr( $offer->id ); ?>"]</code>
+				</p>
+			<?php endif; ?>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="erd_save_offer">
 				<input type="hidden" name="offer_id" value="<?php echo esc_attr( $data['id'] ); ?>">
@@ -329,8 +336,16 @@ class ERD_Admin {
 			wp_die( esc_html__( 'Title, at least one file, and consent text are required.', 'email-required-to-download' ) );
 		}
 
-		$this->repository->save_offer( $data, isset( $_POST['offer_id'] ) ? absint( $_POST['offer_id'] ) : 0 );
-		wp_safe_redirect( $this->admin_url( 'erd-offers', array( 'erd_notice' => 'saved' ) ) );
+		$offer_id = $this->repository->save_offer( $data, isset( $_POST['offer_id'] ) ? absint( $_POST['offer_id'] ) : 0 );
+		wp_safe_redirect(
+			$this->admin_url(
+				'erd-edit-offer',
+				array(
+					'offer_id'    => $offer_id,
+					'erd_notice'  => 'saved',
+				)
+			)
+		);
 		exit;
 	}
 

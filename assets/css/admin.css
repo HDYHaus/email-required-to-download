@@ -29,6 +29,15 @@
 	margin: 16px 0;
 }
 
+.erd-admin .erd-shortcode {
+	margin: 12px 0 18px;
+}
+
+.erd-admin .erd-shortcode code {
+	font-size: 13px;
+	padding: 4px 6px;
+}
+
 .erd-admin .erd-files {
 	display: grid;
 	gap: 8px;
