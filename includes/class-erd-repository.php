@@ -188,6 +188,27 @@ class ERD_Repository {
 		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->leads_table()} WHERE token = %s", sanitize_text_field( $token ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
+	public function validate_token( $token, $offer_id = 0 ) {
+		$parts = ERD_Tokens::parse( $token );
+		if ( ! $parts ) {
+			return false;
+		}
+
+		if ( $offer_id && absint( $offer_id ) !== absint( $parts['offer_id'] ) ) {
+			return false;
+		}
+
+		$lead = $this->get_lead_by_token( $token );
+		if ( ! $lead || absint( $lead->id ) !== $parts['lead_id'] || absint( $lead->offer_id ) !== $parts['offer_id'] ) {
+			return false;
+		}
+
+		return array(
+			'parts' => $parts,
+			'lead'  => $lead,
+		);
+	}
+
 	public function mark_downloaded( $lead_id ) {
 		global $wpdb;
 		$lead = $wpdb->get_row( $wpdb->prepare( "SELECT downloaded_at, download_count FROM {$this->leads_table()} WHERE id = %d", absint( $lead_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -199,7 +220,7 @@ class ERD_Repository {
 			$this->leads_table(),
 			array(
 				'downloaded_at'  => $lead->downloaded_at ? $lead->downloaded_at : current_time( 'mysql' ),
-				'download_count' => absint( $lead->download_count ) + 1,
+				'download_count' => $lead->downloaded_at ? absint( $lead->download_count ) : 1,
 			),
 			array( 'id' => absint( $lead_id ) )
 		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery

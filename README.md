@@ -29,6 +29,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 - Store leads locally in WordPress.
 - Track submissions, unique emails, and downloads.
 - Show confirmation email send status for leads.
+- Validate ready links before showing download buttons.
 - Export lead and download data as CSV.
 
 ## Development

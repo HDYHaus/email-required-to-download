@@ -48,9 +48,13 @@ class ERD_Frontend {
 			} elseif ( 'sent' === $status ) {
 				$message = '<div class="erd-message erd-success">' . esc_html__( 'Thanks. Check your inbox for the download link.', 'email-required-to-download' ) . '</div>';
 			} elseif ( 'ready' === $status && ! empty( $_GET['erd_token'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$token   = sanitize_text_field( wp_unslash( $_GET['erd_token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$message = '<div class="erd-message erd-success">' . wp_kses_post( $offer->success_message ) . $this->download_links( $token, $files, $offer ) . '</div>';
-				$show_form = false;
+				$token = sanitize_text_field( wp_unslash( $_GET['erd_token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				if ( $this->repository->validate_token( $token, $offer->id ) ) {
+					$message   = '<div class="erd-message erd-success">' . wp_kses_post( $offer->success_message ) . $this->download_links( $token, $files, $offer ) . '</div>';
+					$show_form = false;
+				} else {
+					$message = '<div class="erd-message erd-error">' . esc_html__( 'This download link is invalid or expired. Submit the form again to get a new link.', 'email-required-to-download' ) . '</div>';
+				}
 			}
 		}
 
@@ -157,17 +161,18 @@ class ERD_Frontend {
 
 	public function download() {
 		$token = isset( $_GET['token'] ) ? sanitize_text_field( wp_unslash( $_GET['token'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$parts = ERD_Tokens::parse( $token );
+		$token_data = $this->repository->validate_token( $token );
 
-		if ( ! $parts ) {
+		if ( ! $token_data ) {
 			wp_die( esc_html__( 'This download link is invalid or expired.', 'email-required-to-download' ), 403 );
 		}
 
-		$lead  = $this->repository->get_lead_by_token( $token );
+		$lead  = $token_data['lead'];
+		$parts = $token_data['parts'];
 		$offer = $this->repository->get_offer( $parts['offer_id'] );
 		$file  = $this->repository->get_offer_file( $parts['offer_id'], isset( $_GET['file_id'] ) ? absint( $_GET['file_id'] ) : 0 ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( ! $lead || ! $offer || ! $file || absint( $lead->id ) !== $parts['lead_id'] || absint( $lead->offer_id ) !== $parts['offer_id'] ) {
+		if ( ! $offer || ! $file ) {
 			wp_die( esc_html__( 'This download link is invalid.', 'email-required-to-download' ), 403 );
 		}
 
