@@ -17,6 +17,7 @@ Email Required to Download lets site owners create gated download offers, collec
 == Features ==
 
 * Create downloadable offers in WordPress admin.
+* Add an optional public download title and description.
 * Select or upload one or more files from the Media Library.
 * Embed offers with `[email_required_download id="123"]`.
 * Collect email, optional name, and required consent.
@@ -36,6 +37,7 @@ Email Required to Download lets site owners create gated download offers, collec
 
 = 1.1.0 =
 * Add support for multiple files per gated download offer.
+* Add optional public download titles and descriptions.
 * Keep download tracking at the offer/lead level for lightweight bundled offers.
 * Show confirmation email send status in Leads & Analytics and CSV exports.
 

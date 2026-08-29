@@ -56,6 +56,12 @@ class ERD_Frontend {
 		ob_start();
 		?>
 		<div class="erd-download" id="erd-download-<?php echo esc_attr( $offer->id ); ?>">
+			<?php if ( ! empty( $offer->display_title ) ) : ?>
+				<h2 class="erd-title"><?php echo esc_html( $offer->display_title ); ?></h2>
+			<?php endif; ?>
+			<?php if ( ! empty( $offer->description ) ) : ?>
+				<div class="erd-description"><?php echo wp_kses_post( wpautop( $offer->description ) ); ?></div>
+			<?php endif; ?>
 			<?php echo $message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php if ( $show_form ) : ?>
 				<form class="erd-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">

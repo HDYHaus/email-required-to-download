@@ -125,6 +125,8 @@ class ERD_Admin {
 		$defaults = array(
 			'id'                   => 0,
 			'title'                => '',
+			'display_title'        => '',
+			'description'          => '',
 			'file_id'              => 0,
 			'file_url'             => '',
 			'button_text'          => $settings['default_button_text'],
@@ -154,6 +156,14 @@ class ERD_Admin {
 					<tr>
 						<th scope="row"><label for="erd-title"><?php esc_html_e( 'Offer title', 'email-required-to-download' ); ?></label></th>
 						<td><input class="regular-text" id="erd-title" name="title" required value="<?php echo esc_attr( $data['title'] ); ?>"></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="erd-display-title"><?php esc_html_e( 'Download title', 'email-required-to-download' ); ?></label></th>
+						<td><input class="regular-text" id="erd-display-title" name="display_title" value="<?php echo esc_attr( $data['display_title'] ); ?>"></td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="erd-description"><?php esc_html_e( 'Description', 'email-required-to-download' ); ?></label></th>
+						<td><textarea class="large-text" rows="3" id="erd-description" name="description"><?php echo esc_textarea( $data['description'] ); ?></textarea></td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Files', 'email-required-to-download' ); ?></th>
@@ -305,6 +315,8 @@ class ERD_Admin {
 
 		$data = array(
 			'title'                => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
+			'display_title'        => isset( $_POST['display_title'] ) ? sanitize_text_field( wp_unslash( $_POST['display_title'] ) ) : '',
+			'description'          => isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '',
 			'files'                => $files,
 			'button_text'          => isset( $_POST['button_text'] ) ? sanitize_text_field( wp_unslash( $_POST['button_text'] ) ) : '',
 			'success_message'      => isset( $_POST['success_message'] ) ? wp_kses_post( wp_unslash( $_POST['success_message'] ) ) : '',

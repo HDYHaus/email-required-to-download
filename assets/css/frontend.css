@@ -2,6 +2,19 @@
 	max-width: 420px;
 }
 
+.erd-title {
+	font-size: 1.35em;
+	margin: 0 0 8px;
+}
+
+.erd-description {
+	margin-bottom: 14px;
+}
+
+.erd-description p {
+	margin: 0 0 8px;
+}
+
 .erd-form {
 	display: grid;
 	gap: 12px;

@@ -18,6 +18,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 ## Features
 
 - Create downloadable offers in WordPress admin.
+- Add an optional public download title and description.
 - Select or upload one or more files from the Media Library.
 - Embed offers with `[email_required_download id="123"]`.
 - Collect email, optional name, and required consent.
