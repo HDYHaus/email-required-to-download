@@ -125,7 +125,7 @@ class ERD_Admin {
 		$defaults = array(
 			'id'                   => 0,
 			'title'                => '',
-			'display_title'        => '',
+			'show_title'           => 0,
 			'description'          => '',
 			'file_id'              => 0,
 			'file_url'             => '',
@@ -158,8 +158,8 @@ class ERD_Admin {
 						<td><input class="regular-text" id="erd-title" name="title" required value="<?php echo esc_attr( $data['title'] ); ?>"></td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="erd-display-title"><?php esc_html_e( 'Download title', 'email-required-to-download' ); ?></label></th>
-						<td><input class="regular-text" id="erd-display-title" name="display_title" value="<?php echo esc_attr( $data['display_title'] ); ?>"></td>
+						<th scope="row"><?php esc_html_e( 'Display options', 'email-required-to-download' ); ?></th>
+						<td><label><input type="checkbox" name="show_title" value="1" <?php checked( $data['show_title'] ); ?>> <?php esc_html_e( 'Show offer title on the download form', 'email-required-to-download' ); ?></label></td>
 					</tr>
 					<tr>
 						<th scope="row"><label for="erd-description"><?php esc_html_e( 'Description', 'email-required-to-download' ); ?></label></th>
@@ -315,7 +315,7 @@ class ERD_Admin {
 
 		$data = array(
 			'title'                => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
-			'display_title'        => isset( $_POST['display_title'] ) ? sanitize_text_field( wp_unslash( $_POST['display_title'] ) ) : '',
+			'show_title'           => ! empty( $_POST['show_title'] ),
 			'description'          => isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '',
 			'files'                => $files,
 			'button_text'          => isset( $_POST['button_text'] ) ? sanitize_text_field( wp_unslash( $_POST['button_text'] ) ) : '',

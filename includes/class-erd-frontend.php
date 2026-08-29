@@ -56,8 +56,8 @@ class ERD_Frontend {
 		ob_start();
 		?>
 		<div class="erd-download" id="erd-download-<?php echo esc_attr( $offer->id ); ?>">
-			<?php if ( ! empty( $offer->display_title ) ) : ?>
-				<h2 class="erd-title"><?php echo esc_html( $offer->display_title ); ?></h2>
+			<?php if ( ! empty( $offer->show_title ) ) : ?>
+				<h2 class="erd-title"><?php echo esc_html( $offer->title ); ?></h2>
 			<?php endif; ?>
 			<?php if ( ! empty( $offer->description ) ) : ?>
 				<div class="erd-description"><?php echo wp_kses_post( wpautop( $offer->description ) ); ?></div>

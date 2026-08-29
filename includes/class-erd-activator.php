@@ -26,7 +26,7 @@ class ERD_Activator {
 		$sql_offers = "CREATE TABLE {$offers_table} (
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			title varchar(255) NOT NULL,
-			display_title varchar(255) NOT NULL DEFAULT '',
+			show_title tinyint(1) NOT NULL DEFAULT 0,
 			description text NOT NULL,
 			file_id bigint(20) unsigned NOT NULL DEFAULT 0,
 			file_url text NOT NULL,

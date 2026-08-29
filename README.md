@@ -2,11 +2,11 @@
 
 Require an email address before visitors can download a file.
 
-Version: 1.1.0
+Version: 1.1.1
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,7 +18,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 ## Features
 
 - Create downloadable offers in WordPress admin.
-- Add an optional public download title and description.
+- Optionally show the offer title and description on the download form.
 - Select or upload one or more files from the Media Library.
 - Embed offers with `[email_required_download id="123"]`.
 - Collect email, optional name, and required consent.

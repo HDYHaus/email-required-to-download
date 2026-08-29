@@ -60,7 +60,7 @@ class ERD_Repository {
 		$now     = current_time( 'mysql' );
 		$payload = array(
 			'title'                => $data['title'],
-			'display_title'        => $data['display_title'],
+			'show_title'           => ! empty( $data['show_title'] ) ? 1 : 0,
 			'description'          => $data['description'],
 			'file_id'              => absint( $first['file_id'] ),
 			'file_url'             => esc_url_raw( $first['file_url'] ),
