@@ -76,7 +76,7 @@ class ERD_Admin {
 		$this->notice();
 		$offers = $this->repository->get_offers();
 		?>
-		<div class="wrap erd-admin">
+		<div class="wrap erd-admin erd-admin-edit">
 			<h1 class="wp-heading-inline"><?php esc_html_e( 'Email Downloads', 'email-required-to-download' ); ?></h1>
 			<a class="page-title-action" href="<?php echo esc_url( $this->admin_url( 'erd-edit-offer' ) ); ?>"><?php esc_html_e( 'Add New', 'email-required-to-download' ); ?></a>
 			<hr class="wp-header-end">
@@ -170,7 +170,21 @@ class ERD_Admin {
 					</tr>
 					<tr>
 						<th scope="row"><label for="erd-description"><?php esc_html_e( 'Description', 'email-required-to-download' ); ?></label></th>
-						<td><textarea class="large-text" rows="3" id="erd-description" name="description"><?php echo esc_textarea( $data['description'] ); ?></textarea></td>
+						<td>
+							<?php
+							wp_editor(
+								$data['description'],
+								'erd_description',
+								array(
+									'media_buttons' => false,
+									'quicktags'     => true,
+									'textarea_name' => 'description',
+									'textarea_rows' => 4,
+									'teeny'         => true,
+								)
+							);
+							?>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Files', 'email-required-to-download' ); ?></th>
@@ -195,7 +209,21 @@ class ERD_Admin {
 					</tr>
 					<tr>
 						<th scope="row"><label for="erd-success-message"><?php esc_html_e( 'Success message', 'email-required-to-download' ); ?></label></th>
-						<td><textarea class="large-text" rows="3" id="erd-success-message" name="success_message"><?php echo esc_textarea( $data['success_message'] ); ?></textarea></td>
+						<td>
+							<?php
+							wp_editor(
+								$data['success_message'],
+								'erd_success_message',
+								array(
+									'media_buttons' => false,
+									'quicktags'     => true,
+									'textarea_name' => 'success_message',
+									'textarea_rows' => 4,
+									'teeny'         => true,
+								)
+							);
+							?>
+						</td>
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Form fields', 'email-required-to-download' ); ?></th>
