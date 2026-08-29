@@ -130,6 +130,8 @@ class ERD_Admin {
 			'file_id'              => 0,
 			'file_url'             => '',
 			'button_text'          => $settings['default_button_text'],
+			'delivery_mode'        => 'public',
+			'force_download'       => 0,
 			'use_button_colors'    => 0,
 			'button_bg_color'      => '',
 			'button_text_color'    => '',
@@ -158,7 +160,7 @@ class ERD_Admin {
 					<code>[email_required_download id="<?php echo esc_attr( $offer->id ); ?>"]</code>
 				</p>
 			<?php endif; ?>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="erd_save_offer">
 				<input type="hidden" name="offer_id" value="<?php echo esc_attr( $data['id'] ); ?>">
 				<?php wp_nonce_field( 'erd_save_offer' ); ?>
@@ -203,15 +205,32 @@ class ERD_Admin {
 								<?php foreach ( $files as $file ) : ?>
 									<div class="erd-file-row">
 										<input class="erd-file-id" type="hidden" name="file_ids[]" value="<?php echo esc_attr( $file->file_id ); ?>">
-										<input class="regular-text erd-file-url" type="url" name="file_urls[]" required placeholder="<?php echo esc_attr__( 'File URL', 'email-required-to-download' ); ?>" value="<?php echo esc_attr( $file->file_url ); ?>">
+										<input class="erd-protected-path" type="hidden" name="protected_paths[]" value="<?php echo esc_attr( isset( $file->protected_path ) ? $file->protected_path : '' ); ?>">
+										<input class="regular-text erd-file-url" type="url" name="file_urls[]" placeholder="<?php echo esc_attr__( 'File URL', 'email-required-to-download' ); ?>" value="<?php echo esc_attr( $file->file_url ); ?>">
 										<input class="regular-text erd-file-label" type="text" name="file_labels[]" placeholder="<?php echo esc_attr__( 'File label', 'email-required-to-download' ); ?>" value="<?php echo esc_attr( $file->file_label ); ?>">
 										<button type="button" class="button erd-select-file"><?php esc_html_e( 'Select File', 'email-required-to-download' ); ?></button>
 										<button type="button" class="button erd-remove-file"><?php esc_html_e( 'Remove', 'email-required-to-download' ); ?></button>
+										<label class="erd-protected-upload">
+											<span><?php esc_html_e( 'Protected upload', 'email-required-to-download' ); ?></span>
+											<input type="file" name="protected_uploads[]">
+										</label>
 									</div>
 								<?php endforeach; ?>
 							</div>
 							<p><button type="button" class="button erd-add-file"><?php esc_html_e( 'Add File', 'email-required-to-download' ); ?></button></p>
 							<p class="description"><?php esc_html_e( 'Visitors submit the form once to unlock every file in this offer.', 'email-required-to-download' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Delivery', 'email-required-to-download' ); ?></th>
+						<td>
+							<fieldset class="erd-delivery-options">
+								<label><input type="radio" name="delivery_mode" value="public" <?php checked( $data['delivery_mode'], 'public' ); ?>> <?php esc_html_e( 'Public URL delivery', 'email-required-to-download' ); ?></label>
+								<p class="description"><?php esc_html_e( 'Collect an email before showing links, but files remain accessible anywhere their public URL is known.', 'email-required-to-download' ); ?></p>
+								<label><input type="radio" name="delivery_mode" value="protected" <?php checked( $data['delivery_mode'], 'protected' ); ?>> <?php esc_html_e( 'Protected delivery', 'email-required-to-download' ); ?></label>
+								<p class="description"><?php esc_html_e( 'Use protected uploads for truly private files, or copy selected Media Library files into private plugin storage. Existing public media URLs may remain accessible if already known.', 'email-required-to-download' ); ?></p>
+								<label class="erd-force-download"><input type="checkbox" name="force_download" value="1" <?php checked( $data['force_download'] ); ?>> <?php esc_html_e( 'Force files to download instead of opening in the browser', 'email-required-to-download' ); ?></label>
+							</fieldset>
 						</td>
 					</tr>
 					<tr>
@@ -378,6 +397,8 @@ class ERD_Admin {
 		$file_ids    = isset( $_POST['file_ids'] ) && is_array( $_POST['file_ids'] ) ? array_map( 'absint', wp_unslash( $_POST['file_ids'] ) ) : array();
 		$file_urls   = isset( $_POST['file_urls'] ) && is_array( $_POST['file_urls'] ) ? array_map( 'esc_url_raw', wp_unslash( $_POST['file_urls'] ) ) : array();
 		$file_labels = isset( $_POST['file_labels'] ) && is_array( $_POST['file_labels'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['file_labels'] ) ) : array();
+		$protected_paths = isset( $_POST['protected_paths'] ) && is_array( $_POST['protected_paths'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['protected_paths'] ) ) : array();
+		$protected_uploads = $this->protected_uploads();
 		foreach ( $file_urls as $index => $file_url ) {
 			$file_id = isset( $file_ids[ $index ] ) ? absint( $file_ids[ $index ] ) : 0;
 			if ( $file_id ) {
@@ -391,7 +412,18 @@ class ERD_Admin {
 				'file_id'    => $file_id,
 				'file_url'   => $file_url,
 				'file_label' => isset( $file_labels[ $index ] ) ? $file_labels[ $index ] : '',
+				'protected_path' => isset( $protected_paths[ $index ] ) ? $protected_paths[ $index ] : '',
+				'protected_upload' => isset( $protected_uploads[ $index ] ) ? $protected_uploads[ $index ] : array(),
 			);
+		}
+
+		$delivery_mode = isset( $_POST['delivery_mode'] ) && 'protected' === sanitize_key( wp_unslash( $_POST['delivery_mode'] ) ) ? 'protected' : 'public';
+		if ( 'protected' === $delivery_mode ) {
+			$protected_files = $this->repository->prepare_protected_files( $files );
+			if ( false === $protected_files ) {
+				wp_die( esc_html__( 'Protected delivery requires files selected from the local Media Library so they can be copied into private storage.', 'email-required-to-download' ) );
+			}
+			$files = $protected_files;
 		}
 
 		$data = array(
@@ -400,6 +432,8 @@ class ERD_Admin {
 			'description'          => isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '',
 			'files'                => $files,
 			'button_text'          => isset( $_POST['button_text'] ) ? sanitize_text_field( wp_unslash( $_POST['button_text'] ) ) : '',
+			'delivery_mode'        => $delivery_mode,
+			'force_download'       => ! empty( $_POST['force_download'] ),
 			'use_button_colors'    => ! empty( $_POST['use_button_colors'] ),
 			'button_bg_color'      => isset( $_POST['button_bg_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['button_bg_color'] ) ) : '',
 			'button_text_color'    => isset( $_POST['button_text_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['button_text_color'] ) ) : '',
@@ -409,7 +443,7 @@ class ERD_Admin {
 			'consent_text'         => isset( $_POST['consent_text'] ) ? wp_kses_post( wp_unslash( $_POST['consent_text'] ) ) : '',
 		);
 
-		if ( '' === $data['title'] || ! $this->has_file_url( $files ) || '' === $data['consent_text'] ) {
+		if ( '' === $data['title'] || ( 'public' === $delivery_mode && ! $this->has_file_url( $files ) ) || '' === $data['consent_text'] ) {
 			wp_die( esc_html__( 'Title, at least one file, and consent text are required.', 'email-required-to-download' ) );
 		}
 
@@ -482,6 +516,32 @@ class ERD_Admin {
 		}
 
 		return false;
+	}
+
+	private function protected_uploads() {
+		// File data is read only after save_offer() has passed check_admin_referer().
+		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
+		if ( empty( $_FILES['protected_uploads'] ) || ! is_array( $_FILES['protected_uploads'] ) ) {
+			return array();
+		}
+
+		if ( empty( $_FILES['protected_uploads']['name'] ) || ! is_array( $_FILES['protected_uploads']['name'] ) ) {
+			return array();
+		}
+
+		$uploads = array();
+		foreach ( $_FILES['protected_uploads']['name'] as $index => $name ) {
+			$uploads[ $index ] = array(
+				'name'     => sanitize_file_name( wp_unslash( $name ) ),
+				'type'     => isset( $_FILES['protected_uploads']['type'][ $index ] ) ? sanitize_mime_type( $_FILES['protected_uploads']['type'][ $index ] ) : '',
+				'tmp_name' => isset( $_FILES['protected_uploads']['tmp_name'][ $index ] ) ? sanitize_text_field( $_FILES['protected_uploads']['tmp_name'][ $index ] ) : '',
+				'error'    => isset( $_FILES['protected_uploads']['error'][ $index ] ) ? absint( $_FILES['protected_uploads']['error'][ $index ] ) : UPLOAD_ERR_NO_FILE,
+				'size'     => isset( $_FILES['protected_uploads']['size'][ $index ] ) ? absint( $_FILES['protected_uploads']['size'][ $index ] ) : 0,
+			);
+		}
+
+		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
+		return $uploads;
 	}
 
 	private function email_status_label( $lead ) {

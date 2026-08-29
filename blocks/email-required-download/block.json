@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "email-required-to-download/download",
+	"title": "Email Required Download",
+	"category": "widgets",
+	"icon": "download",
+	"description": "Show an Email Required to Download offer.",
+	"textdomain": "email-required-to-download",
+	"attributes": {
+		"offerId": {
+			"type": "number",
+			"default": 0
+		}
+	},
+	"supports": {
+		"html": false
+	}
+}

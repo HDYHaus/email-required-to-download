@@ -31,7 +31,11 @@ class ERD_Frontend {
 
 	public function shortcode( $atts ) {
 		$atts  = shortcode_atts( array( 'id' => 0 ), $atts, 'email_required_download' );
-		$offer = $this->repository->get_offer( absint( $atts['id'] ) );
+		return $this->render_offer( absint( $atts['id'] ) );
+	}
+
+	public function render_offer( $offer_id ) {
+		$offer = $this->repository->get_offer( absint( $offer_id ) );
 		$files = $offer ? $this->repository->get_offer_files( $offer->id ) : array();
 
 		if ( ! $offer || ! $files ) {
@@ -47,6 +51,8 @@ class ERD_Frontend {
 				$message = '<div class="erd-message erd-error">' . esc_html__( 'Please enter a valid email address and accept the consent checkbox.', 'email-required-to-download' ) . '</div>';
 			} elseif ( 'sent' === $status ) {
 				$message = '<div class="erd-message erd-success">' . esc_html__( 'Thanks. Check your inbox for the download link.', 'email-required-to-download' ) . '</div>';
+			} elseif ( 'email_failed' === $status ) {
+				$message = '<div class="erd-message erd-error">' . esc_html__( 'We could not send the download email. Please try again or contact the site owner.', 'email-required-to-download' ) . '</div>';
 			} elseif ( 'ready' === $status && ! empty( $_GET['erd_token'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$token = sanitize_text_field( wp_unslash( $_GET['erd_token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				if ( $this->repository->validate_token( $token, $offer->id ) ) {
@@ -151,7 +157,7 @@ class ERD_Frontend {
 		if ( $offer->require_confirmation ) {
 			$sent = $this->send_confirmation_email( $email, $offer, $this->access_url( $redirect, $offer_id, $token ) );
 			$this->repository->update_lead_email_status( $lead_id, $sent ? 'sent' : 'failed' );
-			wp_safe_redirect( add_query_arg( array( 'erd_status' => 'sent', 'erd_offer' => $offer_id ), $redirect ) );
+			wp_safe_redirect( add_query_arg( array( 'erd_status' => $sent ? 'sent' : 'email_failed', 'erd_offer' => $offer_id ), $redirect ) );
 			exit;
 		}
 
@@ -177,6 +183,10 @@ class ERD_Frontend {
 		}
 
 		$this->repository->mark_downloaded( $lead->id );
+		if ( isset( $offer->delivery_mode ) && 'protected' === $offer->delivery_mode ) {
+			$this->stream_protected_file( $file, ! empty( $offer->force_download ) );
+		}
+
 		wp_safe_redirect( esc_url_raw( $file->file_url ) );
 		exit;
 	}
@@ -211,6 +221,25 @@ class ERD_Frontend {
 		$output .= '</div>';
 
 		return $output;
+	}
+
+	private function stream_protected_file( $file, $force_download ) {
+		$path = isset( $file->protected_path ) ? $file->protected_path : '';
+		$real_path = $path ? realpath( $path ) : false;
+		$real_dir  = realpath( ERD_Activator::protected_dir() );
+		if ( ! $real_path || ! $real_dir || 0 !== strpos( $real_path, trailingslashit( $real_dir ) ) || ! file_exists( $real_path ) || ! is_readable( $real_path ) ) {
+			wp_die( esc_html__( 'This download file is not available.', 'email-required-to-download' ), 404 );
+		}
+
+		$filename = ! empty( $file->file_label ) ? $file->file_label : basename( $path );
+		$mime     = ! empty( $file->mime_type ) ? $file->mime_type : 'application/octet-stream';
+
+		nocache_headers();
+		header( 'Content-Type: ' . $mime );
+		header( 'Content-Length: ' . filesize( $real_path ) );
+		header( 'Content-Disposition: ' . ( $force_download ? 'attachment' : 'inline' ) . '; filename="' . rawurlencode( $filename ) . '"' );
+		readfile( $real_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
+		exit;
 	}
 
 	private function button_style_attr( $offer ) {

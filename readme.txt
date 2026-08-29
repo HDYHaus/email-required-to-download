@@ -2,9 +2,9 @@
 Contributors: hdyhaus, mariaojob
 Tags: downloads, lead capture, email, media
 Requires at least: 6.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.3
+Stable tag: 1.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,8 +20,11 @@ Email Required to Download lets site owners create gated download offers, collec
 * Optionally show the offer title and description on the download form.
 * Select or upload one or more files from the Media Library.
 * Embed offers with `[email_required_download id="123"]`.
+* Insert offers with the Email Required Download block.
 * Collect email, optional name, and required consent.
 * Support immediate downloads or email-confirmed download links per offer.
+* Choose public URL delivery or protected private-file delivery with direct protected uploads.
+* Optionally force protected files to download instead of opening in the browser.
 * Set optional per-offer button colors.
 * Show helpful form hints for admins and visitors.
 * Unlock multiple files from a single email submission.
@@ -37,6 +40,12 @@ Email Required to Download lets site owners create gated download offers, collec
 3. Open Email Downloads to create your first offer.
 
 == Changelog ==
+
+= 1.2.0 =
+* Add a dynamic Email Required Download block for the block editor.
+* Add protected delivery mode that copies Media Library files into private plugin storage and streams them after token validation.
+* Add optional force-download behavior for protected files.
+* Show a visitor-facing error when confirmation email delivery fails.
 
 = 1.1.3 =
 * Add optional per-offer button background and text colors.

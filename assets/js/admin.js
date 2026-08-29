@@ -4,10 +4,12 @@
 	function fileRow() {
 		return $('<div class="erd-file-row">' +
 			'<input class="erd-file-id" type="hidden" name="file_ids[]" value="">' +
-			'<input class="regular-text erd-file-url" type="url" name="file_urls[]" required placeholder="File URL" value="">' +
+			'<input class="erd-protected-path" type="hidden" name="protected_paths[]" value="">' +
+			'<input class="regular-text erd-file-url" type="url" name="file_urls[]" placeholder="File URL" value="">' +
 			'<input class="regular-text erd-file-label" type="text" name="file_labels[]" placeholder="File label" value="">' +
 			'<button type="button" class="button erd-select-file">Select File</button> ' +
 			'<button type="button" class="button erd-remove-file">Remove</button>' +
+			'<label class="erd-protected-upload"><span>Protected upload</span><input type="file" name="protected_uploads[]"></label>' +
 		'</div>');
 	}
 
@@ -36,6 +38,7 @@
 		frame.on('select', function () {
 			var attachment = frame.state().get('selection').first().toJSON();
 			row.find('.erd-file-id').val(attachment.id);
+			row.find('.erd-protected-path').val('');
 			row.find('.erd-file-url').val(attachment.url);
 			if (!row.find('.erd-file-label').val()) {
 				row.find('.erd-file-label').val(attachment.title || attachment.filename);

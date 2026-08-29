@@ -23,17 +23,20 @@ class ERD_Plugin {
 	public function init() {
 		$this->repository = new ERD_Repository();
 
-		if ( get_option( 'erd_db_version' ) !== ERD_DB_VERSION ) {
+		if ( get_option( 'erd_db_version' ) !== ERD_DB_VERSION || ! ERD_Activator::is_schema_current() ) {
 			ERD_Activator::activate();
 		}
 
 		add_filter( 'plugin_action_links_' . plugin_basename( ERD_PLUGIN_FILE ), array( $this, 'plugin_action_links' ) );
 
+		$frontend = new ERD_Frontend( $this->repository );
+
 		if ( is_admin() ) {
 			( new ERD_Admin( $this->repository ) )->init();
 		}
 
-		( new ERD_Frontend( $this->repository ) )->init();
+		$frontend->init();
+		( new ERD_Block( $this->repository, $frontend ) )->init();
 	}
 
 	public function plugin_action_links( $links ) {
