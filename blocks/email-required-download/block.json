@@ -7,6 +7,7 @@
 	"icon": "download",
 	"description": "Show an Email Required to Download offer.",
 	"textdomain": "email-required-to-download",
+	"editorScript": "file:./index.js",
 	"editorStyle": "file:./editor.css",
 	"attributes": {
 		"offerId": {

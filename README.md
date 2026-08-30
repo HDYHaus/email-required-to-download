@@ -45,3 +45,7 @@ wp-content/plugins/email-required-to-download
 ```
 
 Activate it from WordPress admin, then open **Email Downloads**.
+
+## Privacy
+
+Email Required to Download stores submitted email addresses, optional names, consent details, hashed IP addresses, user agents, referrers, email delivery status, and download activity in the site's local WordPress database. The plugin does not send lead data to a third-party service by default. Site owners are responsible for describing their own download forms, consent language, retention practices, and email delivery provider in their privacy policy.

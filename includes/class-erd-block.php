@@ -23,29 +23,27 @@ class ERD_Block {
 	}
 
 	public function register() {
-		wp_register_script(
-			'erd-block-editor',
-			ERD_PLUGIN_URL . 'blocks/email-required-download/index.js',
-			array( 'wp-blocks', 'wp-block-editor', 'wp-components', 'wp-element', 'wp-i18n', 'wp-server-side-render' ),
-			ERD_VERSION,
-			true
-		);
-
-		wp_localize_script(
-			'erd-block-editor',
-			'erdBlockData',
-			array(
-				'offers' => $this->block_offers(),
-			)
-		);
-
-		register_block_type(
+		$block_type = register_block_type(
 			ERD_PLUGIN_DIR . 'blocks/email-required-download',
 			array(
-				'editor_script'   => 'erd-block-editor',
 				'render_callback' => array( $this, 'render' ),
 			)
 		);
+
+		$editor_script_handles = is_object( $block_type ) && isset( $block_type->editor_script_handles ) ? $block_type->editor_script_handles : array();
+		$editor_script_handle  = reset( $editor_script_handles );
+
+		if ( $editor_script_handle ) {
+			wp_add_inline_script(
+				$editor_script_handle,
+				'window.erdBlockData = ' . wp_json_encode(
+					array(
+						'offers' => $this->block_offers(),
+					)
+				) . ';',
+				'before'
+			);
+		}
 	}
 
 	public function render( $attributes ) {
