@@ -1,0 +1,27 @@
+name: Plugin checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check PHP syntax and release regressions
+        run: |
+          find includes blocks -name '*.php' -print0 | xargs -0 -n 1 php -l
+          php -l email-required-to-download.php
+          php -l uninstall.php
+          php tests/release-regressions.php
+      - name: Check JavaScript syntax
+        run: |
+          node --check assets/js/admin.js
+          node --check blocks/email-required-download/index.js
+      - name: Verify release package and whitespace
+        run: |
+          python3 tools/build-release.py
+          git diff --exit-code -- release/manifest-1.2.1.json
+          git diff --check
