@@ -239,15 +239,15 @@ class ERD_Repository {
 		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 	}
 
-	public function get_leads( $offer_id = 0, $limit = 50 ) {
+	public function get_leads( $offer_id = 0, $limit = 50, $offset = 0 ) {
 		global $wpdb;
 		$leads_table  = esc_sql( $this->leads_table() );
 		$offers_table = esc_sql( $this->offers_table() );
 		if ( $offer_id ) {
-			return $wpdb->get_results( $wpdb->prepare( "SELECT l.*, o.title AS offer_title FROM {$leads_table} l LEFT JOIN {$offers_table} o ON l.offer_id = o.id WHERE l.offer_id = %d ORDER BY l.submitted_at DESC LIMIT %d", absint( $offer_id ), absint( $limit ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			return $wpdb->get_results( $wpdb->prepare( "SELECT l.*, o.title AS offer_title FROM {$leads_table} l LEFT JOIN {$offers_table} o ON l.offer_id = o.id WHERE l.offer_id = %d ORDER BY l.submitted_at DESC, l.id DESC LIMIT %d OFFSET %d", absint( $offer_id ), absint( $limit ), absint( $offset ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 
-		return $wpdb->get_results( $wpdb->prepare( "SELECT l.*, o.title AS offer_title FROM {$leads_table} l LEFT JOIN {$offers_table} o ON l.offer_id = o.id ORDER BY l.submitted_at DESC LIMIT %d", absint( $limit ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $wpdb->get_results( $wpdb->prepare( "SELECT l.*, o.title AS offer_title FROM {$leads_table} l LEFT JOIN {$offers_table} o ON l.offer_id = o.id ORDER BY l.submitted_at DESC, l.id DESC LIMIT %d OFFSET %d", absint( $limit ), absint( $offset ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	public function get_offer_stats( $offer_id = 0 ) {
@@ -391,8 +391,14 @@ class ERD_Repository {
 	}
 
 	private function delete_protected_files( $offer_id ) {
+		global $wpdb;
+		$table = esc_sql( $this->files_table() );
 		foreach ( $this->get_offer_files( $offer_id ) as $file ) {
 			if ( ! empty( $file->protected_path ) && $this->is_protected_path( $file->protected_path, ERD_Activator::protected_dir() ) && file_exists( $file->protected_path ) ) {
+				$shared = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE protected_path = %s AND offer_id <> %d LIMIT 1", $file->protected_path, absint( $offer_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				if ( $shared ) {
+					continue;
+				}
 				unlink( $file->protected_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
 			}
 		}

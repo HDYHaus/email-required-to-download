@@ -33,6 +33,58 @@
 	max-width: 980px;
 }
 
+.erd-admin-leads {
+	max-width: 1400px;
+}
+
+.erd-leads-table-wrap {
+	overflow-x: auto;
+}
+
+.erd-leads-table-wrap table {
+	min-width: 1000px;
+}
+
+.erd-leads-pagination {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin: 12px 0;
+}
+
+.erd-leads-pagination p {
+	margin: 0;
+}
+
+.erd-leads-pagination ul.page-numbers {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0;
+	list-style: none;
+}
+
+.erd-leads-pagination .page-numbers li {
+	margin: 0;
+}
+
+.erd-leads-pagination a.page-numbers,
+.erd-leads-pagination span.page-numbers {
+	display: inline-block;
+	padding: 5px 10px;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+	text-decoration: none;
+}
+
+.erd-leads-pagination span.current {
+	border-color: #2271b1;
+	background: #2271b1;
+	color: #fff;
+}
+
 .erd-admin-form-page .form-table {
 	margin-top: 18px;
 }
@@ -169,6 +221,29 @@
 
 .erd-admin .erd-force-download {
 	margin-top: 4px;
+}
+
+.erd-admin .erd-hosting-help {
+	max-width: 850px;
+	margin: 20px 0;
+	padding: 4px 20px 12px;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+}
+
+.erd-admin .erd-hosting-help li {
+	margin-bottom: 10px;
+}
+
+.erd-admin .erd-hosting-help summary {
+	cursor: pointer;
+	font-weight: 600;
+}
+
+.erd-admin .erd-nginx-rules {
+	overflow-x: auto;
+	padding: 12px;
+	background: #f0f0f1;
 }
 
 @media (max-width: 1100px) {

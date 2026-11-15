@@ -266,7 +266,7 @@ class ERD_Frontend {
 			wp_die( esc_html__( 'This download file is not available.', 'email-required-to-download' ), 404 );
 		}
 
-		$filename = ! empty( $file->file_label ) ? $file->file_label : basename( $path );
+		$filename = $this->download_filename( $file );
 		$mime     = ! empty( $file->mime_type ) ? $file->mime_type : 'application/octet-stream';
 
 		nocache_headers();
@@ -275,6 +275,17 @@ class ERD_Frontend {
 		header( 'Content-Disposition: ' . ( $force_download ? 'attachment' : 'inline' ) . '; filename="' . rawurlencode( $filename ) . '"' );
 		readfile( $real_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile
 		exit;
+	}
+
+	private function download_filename( $file ) {
+		$source    = basename( $file->protected_path );
+		$filename  = ! empty( $file->file_label ) ? sanitize_file_name( $file->file_label ) : $source;
+		$extension = pathinfo( $source, PATHINFO_EXTENSION );
+		if ( '' !== $extension && strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) !== strtolower( $extension ) ) {
+			$filename .= '.' . $extension;
+		}
+
+		return $filename;
 	}
 
 	private function button_style_attr( $offer ) {

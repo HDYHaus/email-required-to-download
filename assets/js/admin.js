@@ -1,6 +1,13 @@
 (function ($) {
 	'use strict';
 
+	function updateDeliveryHint() {
+		$('.erd-protected-help').removeClass('hide-if-js').prop('hidden', $('input[name="delivery_mode"]:checked').val() !== 'protected');
+	}
+
+	$(updateDeliveryHint);
+	$(document).on('change', 'input[name="delivery_mode"]', updateDeliveryHint);
+
 	function fileRow() {
 		return $('<div class="erd-file-row">' +
 			'<input class="erd-file-id" type="hidden" name="file_ids[]" value="">' +

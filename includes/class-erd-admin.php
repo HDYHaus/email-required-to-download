@@ -46,13 +46,82 @@ class ERD_Admin {
 			return;
 		}
 
-		wp_enqueue_style( 'erd-admin', ERD_PLUGIN_URL . 'assets/css/admin.css', array(), ERD_VERSION );
+		wp_enqueue_style( 'erd-admin', ERD_PLUGIN_URL . 'assets/css/admin.css', array(), ERD_VERSION . '.' . filemtime( ERD_PLUGIN_DIR . 'assets/css/admin.css' ) );
 		wp_enqueue_media();
-		wp_enqueue_script( 'erd-admin', ERD_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery' ), ERD_VERSION, true );
+		wp_enqueue_script( 'erd-admin', ERD_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery' ), ERD_VERSION . '.' . filemtime( ERD_PLUGIN_DIR . 'assets/js/admin.js' ), true );
 	}
 
 	private function admin_url( $page, array $args = array() ) {
 		return add_query_arg( array_merge( array( 'page' => $page ), $args ), admin_url( 'admin.php' ) );
+	}
+
+	private function detected_server() {
+		$software = isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '';
+		if ( false !== stripos( $software, 'nginx' ) || false !== stripos( $software, 'openresty' ) ) {
+			return 'nginx';
+		}
+		if ( false !== stripos( $software, 'litespeed' ) ) {
+			return 'litespeed';
+		}
+		if ( false !== stripos( $software, 'apache' ) ) {
+			return 'apache';
+		}
+
+		return 'unknown';
+	}
+
+	private function nginx_rules() {
+		$path = wp_parse_url( content_url( 'erd-protected/' ), PHP_URL_PATH );
+		if ( ! is_string( $path ) || '' === $path ) {
+			return '';
+		}
+		// Nginx matches decoded URI paths. Quote configuration arguments for custom content paths.
+		$path = str_replace( array( '\\', '"', '$', "\r", "\n" ), array( '\\\\', '\\"', '\\$', '', '' ), rawurldecode( $path ) );
+
+		return 'location = "' . rtrim( $path, '/' ) . '" { deny all; }' . "\n" . 'location ^~ "' . $path . '" { deny all; }';
+	}
+
+	private function render_hosting_help() {
+		$server = $this->detected_server();
+		$labels = array(
+			'nginx'     => __( 'Nginx / OpenResty detected', 'email-required-to-download' ),
+			'apache'    => __( 'Apache detected', 'email-required-to-download' ),
+			'litespeed' => __( 'LiteSpeed detected', 'email-required-to-download' ),
+			'unknown'   => __( 'Server type could not be identified', 'email-required-to-download' ),
+		);
+		?>
+		<section id="erd-protected-hosting" class="erd-hosting-help" aria-labelledby="erd-hosting-title">
+			<h2 id="erd-hosting-title"><?php esc_html_e( 'Protected downloads: hosting setup', 'email-required-to-download' ); ?></h2>
+			<p><strong><?php echo esc_html( $labels[ $server ] ); ?></strong></p>
+			<?php if ( in_array( $server, array( 'apache', 'litespeed' ), true ) ) : ?>
+				<details open>
+					<summary><?php esc_html_e( 'Apache / LiteSpeed setup instructions', 'email-required-to-download' ); ?></summary>
+				<p><?php esc_html_e( 'The plugin creates an .htaccess rule to block direct access to protected files. Ask your host to confirm that this rule is honored before storing confidential files.', 'email-required-to-download' ); ?></p>
+					<p><?php esc_html_e( 'Verify that a real file in erd-protected returns 403 Forbidden when opened directly, then check that a valid download link still delivers it.', 'email-required-to-download' ); ?></p>
+				</details>
+			<?php elseif ( 'nginx' === $server ) : ?>
+				<p><?php esc_html_e( 'Your host needs to add a server rule before you use protected downloads. Send them the instructions below.', 'email-required-to-download' ); ?></p>
+			<?php else : ?>
+				<p><?php esc_html_e( 'Ask your host which web server delivers your files and how to block direct access to the erd-protected folder before using protected downloads.', 'email-required-to-download' ); ?></p>
+			<?php endif; ?>
+			<details <?php if ( in_array( $server, array( 'nginx', 'unknown' ), true ) ) : ?>open<?php endif; ?>>
+				<summary><?php echo esc_html( in_array( $server, array( 'nginx', 'unknown' ), true ) ? __( 'Nginx setup instructions', 'email-required-to-download' ) : __( 'Other hosting configurations (Nginx)', 'email-required-to-download' ) ); ?></summary>
+			<p><?php esc_html_e( 'Server detection cannot confirm protection: a proxy can hide which server delivers your files. If your host also uses Nginx, these instructions may apply.', 'email-required-to-download' ); ?></p>
+			<ol>
+				<li><?php esc_html_e( 'Send the rule below to your hosting provider. Ask them to add it inside the server block for this website, check the configuration, and reload Nginx. Do not paste it into .htaccess or the WordPress editor.', 'email-required-to-download' ); ?></li>
+				<li><?php esc_html_e( 'Ask the host to verify that an actual file inside erd-protected returns 403 Forbidden when opened directly, including through any CDN or proxy. A missing file returning 404 does not prove protection.', 'email-required-to-download' ); ?></li>
+				<li><?php esc_html_e( 'Then test a valid emailed download link. The plugin should still deliver the file. Until the host confirms protection, do not upload confidential files using protected delivery.', 'email-required-to-download' ); ?></li>
+			</ol>
+			<?php if ( $this->nginx_rules() ) : ?>
+				<pre class="erd-nginx-rules"><code><?php echo esc_html( $this->nginx_rules() ); ?></code></pre>
+			<?php else : ?>
+				<p><?php esc_html_e( 'The protected folder URL could not be determined. Ask your host to identify and block its public URL path.', 'email-required-to-download' ); ?></p>
+			<?php endif; ?>
+			<p><?php esc_html_e( 'If the content folder is served from a separate domain, the host must apply protection there as well.', 'email-required-to-download' ); ?></p>
+			</details>
+			<p class="description"><?php esc_html_e( 'Media Library originals can remain public. Use protected uploads for files that must not be public.', 'email-required-to-download' ); ?></p>
+		</section>
+		<?php
 	}
 
 	private function notice() {
@@ -228,7 +297,7 @@ class ERD_Admin {
 								<label><input type="radio" name="delivery_mode" value="public" <?php checked( $data['delivery_mode'], 'public' ); ?>> <?php esc_html_e( 'Public URL delivery', 'email-required-to-download' ); ?></label>
 								<p class="description"><?php esc_html_e( 'Collect an email before showing links, but files remain accessible anywhere their public URL is known.', 'email-required-to-download' ); ?></p>
 								<label><input type="radio" name="delivery_mode" value="protected" <?php checked( $data['delivery_mode'], 'protected' ); ?>> <?php esc_html_e( 'Protected delivery', 'email-required-to-download' ); ?></label>
-								<p class="description"><?php esc_html_e( 'Use protected uploads for truly private files, or copy selected Media Library files into private plugin storage. Existing public media URLs may remain accessible if already known.', 'email-required-to-download' ); ?></p>
+								<p class="description erd-protected-help hide-if-js"><?php esc_html_e( 'Protected downloads may require hosting setup.', 'email-required-to-download' ); ?> <a href="<?php echo esc_url( $this->admin_url( 'erd-settings', array( 'tab' => 'advanced' ) ) . '#erd-protected-hosting' ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Review Advanced settings before using this option.', 'email-required-to-download' ); ?></a></p>
 								<label class="erd-force-download"><input type="checkbox" name="force_download" value="1" <?php checked( $data['force_download'] ); ?>> <?php esc_html_e( 'Force files to download instead of opening in the browser', 'email-required-to-download' ); ?></label>
 							</fieldset>
 						</td>
@@ -305,9 +374,15 @@ class ERD_Admin {
 		$offer_id = isset( $_GET['offer_id'] ) ? absint( $_GET['offer_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$offers   = $this->repository->get_offers();
 		$stats    = $this->repository->get_offer_stats( $offer_id );
-		$leads    = $this->repository->get_leads( $offer_id, 100 );
+		$per_page = 25;
+		$total    = $stats['submissions'];
+		$pages    = max( 1, (int) ceil( $total / $per_page ) );
+		$paged    = isset( $_GET['paged'] ) && is_scalar( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$paged    = max( 1, min( $pages, $paged ) );
+		$offset   = ( $paged - 1 ) * $per_page;
+		$leads    = $this->repository->get_leads( $offer_id, $per_page, $offset );
 		?>
-		<div class="wrap erd-admin erd-admin-form-page">
+		<div class="wrap erd-admin erd-admin-form-page erd-admin-leads">
 			<h1><?php esc_html_e( 'Leads & Analytics', 'email-required-to-download' ); ?></h1>
 			<div class="erd-stats">
 				<div><strong><?php echo esc_html( $stats['submissions'] ); ?></strong><span><?php esc_html_e( 'Submissions', 'email-required-to-download' ); ?></span></div>
@@ -316,7 +391,7 @@ class ERD_Admin {
 			</div>
 			<form method="get" class="erd-filter">
 				<input type="hidden" name="page" value="erd-leads">
-				<select name="offer_id">
+				<select name="offer_id" aria-label="<?php esc_attr_e( 'Filter by offer', 'email-required-to-download' ); ?>">
 					<option value="0"><?php esc_html_e( 'All offers', 'email-required-to-download' ); ?></option>
 					<?php foreach ( $offers as $offer ) : ?>
 						<option value="<?php echo esc_attr( $offer->id ); ?>" <?php selected( $offer_id, $offer->id ); ?>><?php echo esc_html( $offer->title ); ?></option>
@@ -325,15 +400,19 @@ class ERD_Admin {
 				<?php submit_button( __( 'Filter', 'email-required-to-download' ), 'secondary', '', false ); ?>
 				<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=erd_export_leads&offer_id=' . absint( $offer_id ) ), 'erd_export_leads' ) ); ?>"><?php esc_html_e( 'Export CSV', 'email-required-to-download' ); ?></a>
 			</form>
+			<?php $this->render_lead_pagination( $total, $paged, $per_page, $offer_id, 'top' ); ?>
+			<div class="erd-leads-table-wrap">
 			<table class="widefat striped">
-				<thead><tr><th><?php esc_html_e( 'Offer', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Email', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Name', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Submitted', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Email Status', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Downloads', 'email-required-to-download' ); ?></th><th><?php esc_html_e( 'Downloaded', 'email-required-to-download' ); ?></th></tr></thead>
+				<thead><tr><th scope="col"><?php esc_html_e( '#', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Offer', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Email', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Name', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Consent', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Submitted', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Email Status', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Downloads', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Downloaded', 'email-required-to-download' ); ?></th></tr></thead>
 				<tbody>
 					<?php if ( $leads ) : ?>
-						<?php foreach ( $leads as $lead ) : ?>
+						<?php foreach ( $leads as $index => $lead ) : ?>
 							<tr>
+								<td><?php echo esc_html( number_format_i18n( $offset + $index + 1 ) ); ?></td>
 								<td><?php echo esc_html( $lead->offer_title ); ?></td>
 								<td><a href="mailto:<?php echo esc_attr( $lead->email ); ?>"><?php echo esc_html( $lead->email ); ?></a></td>
 								<td><?php echo esc_html( $lead->name ); ?></td>
+								<td><?php echo esc_html( 1 === (int) $lead->consent_given ? __( 'Yes', 'email-required-to-download' ) : __( 'No', 'email-required-to-download' ) ); ?></td>
 								<td><?php echo esc_html( $lead->submitted_at ); ?></td>
 								<td><?php echo esc_html( $this->email_status_label( $lead ) ); ?></td>
 								<td><?php echo esc_html( $lead->download_count ); ?></td>
@@ -341,20 +420,66 @@ class ERD_Admin {
 							</tr>
 						<?php endforeach; ?>
 					<?php else : ?>
-						<tr><td colspan="7"><?php esc_html_e( 'No leads yet.', 'email-required-to-download' ); ?></td></tr>
+						<tr><td colspan="9"><?php esc_html_e( 'No leads yet.', 'email-required-to-download' ); ?></td></tr>
 					<?php endif; ?>
 				</tbody>
 			</table>
+			</div>
+			<?php $this->render_lead_pagination( $total, $paged, $per_page, $offer_id, 'bottom' ); ?>
 		</div>
+		<?php
+	}
+
+	private function render_lead_pagination( $total, $paged, $per_page, $offer_id, $position ) {
+		$pages = (int) ceil( $total / $per_page );
+		$links = $pages > 1 ? paginate_links(
+			array(
+				'base'      => str_replace( '999999999', '%#%', $this->admin_url( 'erd-leads', array( 'offer_id' => $offer_id, 'paged' => 999999999 ) ) ),
+				'format'    => '',
+				'current'   => $paged,
+				'total'     => $pages,
+				'type'      => 'list',
+				'prev_text' => __( 'Previous', 'email-required-to-download' ),
+				'next_text' => __( 'Next', 'email-required-to-download' ),
+			)
+		) : '';
+		?>
+		<nav class="erd-leads-pagination" aria-label="<?php echo esc_attr( 'top' === $position ? __( 'Top leads pagination', 'email-required-to-download' ) : __( 'Bottom leads pagination', 'email-required-to-download' ) ); ?>">
+			<p>
+				<?php
+				if ( $total ) {
+					printf(
+						/* translators: 1: first entry shown, 2: last entry shown, 3: total entries in the selected offer filter. */
+						esc_html__( 'Showing %1$s–%2$s of %3$s entries', 'email-required-to-download' ),
+						esc_html( number_format_i18n( ( $paged - 1 ) * $per_page + 1 ) ),
+						esc_html( number_format_i18n( min( $paged * $per_page, $total ) ) ),
+						esc_html( number_format_i18n( $total ) )
+					);
+				} else {
+					esc_html_e( '0 entries', 'email-required-to-download' );
+				}
+				?>
+			</p>
+			<?php echo wp_kses_post( $links ); ?>
+		</nav>
 		<?php
 	}
 
 	public function render_settings_page() {
 		$this->notice();
-		$settings = $this->repository->get_settings();
+		$settings   = $this->repository->get_settings();
+		$active_tab = isset( $_GET['tab'] ) && is_string( $_GET['tab'] ) && 'advanced' === sanitize_key( wp_unslash( $_GET['tab'] ) ) ? 'advanced' : 'general'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
 		<div class="wrap erd-admin erd-admin-form-page">
 			<h1><?php esc_html_e( 'Settings', 'email-required-to-download' ); ?></h1>
+			<nav class="nav-tab-wrapper" aria-label="<?php esc_attr_e( 'Settings sections', 'email-required-to-download' ); ?>">
+				<?php foreach ( array( 'general' => __( 'General', 'email-required-to-download' ), 'advanced' => __( 'Advanced', 'email-required-to-download' ) ) as $tab => $label ) : ?>
+					<a class="nav-tab<?php echo $active_tab === $tab ? ' nav-tab-active' : ''; ?>" href="<?php echo esc_url( $this->admin_url( 'erd-settings', array( 'tab' => $tab ) ) ); ?>"<?php if ( $active_tab === $tab ) : ?> aria-current="page"<?php endif; ?>><?php echo esc_html( $label ); ?></a>
+				<?php endforeach; ?>
+			</nav>
+			<?php if ( 'advanced' === $active_tab ) : ?>
+				<?php $this->render_hosting_help(); ?>
+			<?php else : ?>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="erd_save_settings">
 				<?php wp_nonce_field( 'erd_save_settings' ); ?>
@@ -384,6 +509,7 @@ class ERD_Admin {
 				</table>
 				<?php submit_button( __( 'Save Settings', 'email-required-to-download' ) ); ?>
 			</form>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -493,7 +619,6 @@ class ERD_Admin {
 		}
 
 		$offer_id = isset( $_GET['offer_id'] ) ? absint( $_GET['offer_id'] ) : 0;
-		$leads    = $this->repository->get_leads( $offer_id, 100000 );
 
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=utf-8' );
@@ -501,11 +626,23 @@ class ERD_Admin {
 
 		$output = fopen( 'php://output', 'w' );
 		fputcsv( $output, array( 'Offer', 'Email', 'Name', 'Consent Given', 'Consent Text', 'Consent At', 'Submitted At', 'Email Status', 'Email Sent At', 'Downloaded At', 'Download Count', 'Referrer', 'IP Hash', 'User Agent' ) );
-		foreach ( $leads as $lead ) {
-			fputcsv( $output, array( $lead->offer_title, $lead->email, $lead->name, $lead->consent_given, $lead->consent_text, $lead->consent_at, $lead->submitted_at, $lead->email_status, $lead->email_sent_at, $lead->downloaded_at, $lead->download_count, $lead->referrer, $lead->ip_hash, $lead->user_agent ) );
-		}
+		$offset = 0;
+		do {
+			$leads = $this->repository->get_leads( $offer_id, 500, $offset );
+			foreach ( $leads as $lead ) {
+				$row = array( $lead->offer_title, $lead->email, $lead->name, $lead->consent_given, $lead->consent_text, $lead->consent_at, $lead->submitted_at, $lead->email_status, $lead->email_sent_at, $lead->downloaded_at, $lead->download_count, $lead->referrer, $lead->ip_hash, $lead->user_agent );
+				fputcsv( $output, array_map( array( $this, 'csv_cell' ), $row ) );
+			}
+			$offset += 500;
+		} while ( 500 === count( $leads ) );
 		fclose( $output ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		exit;
+	}
+
+	private function csv_cell( $value ) {
+		$value = (string) $value;
+		// Keep submitted text from being evaluated as a spreadsheet formula.
+		return preg_match( '/^[\x00-\x20]*[=+@-]/', $value ) || preg_match( '/^[\t\r\n]/', $value ) ? "'" . $value : $value;
 	}
 
 	private function has_file_url( array $files ) {
