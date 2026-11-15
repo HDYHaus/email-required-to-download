@@ -3,9 +3,9 @@
  * Plugin Name: Email Required to Download
  * Plugin URI: https://hdyhaus.com/wp-plugins/email-required-to-download
  * Description: Require an email address before visitors can download a file.
- * Version: 1.2.1
- * Author: HDY Haus
- * Author URI: https://hdyhaus.com/wp-plugins/email-required-to-download
+ * Version: 1.2.2
+ * Author: HDY Haus and Mary Mojisola Job
+ * Author URI: https://maryjob.com
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: email-required-to-download
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ERD_VERSION', '1.2.1' );
+define( 'ERD_VERSION', '1.2.2' );
 define( 'ERD_DB_VERSION', '1.2.0' );
 define( 'ERD_PLUGIN_FILE', __FILE__ );
 define( 'ERD_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

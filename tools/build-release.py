@@ -10,6 +10,10 @@ main = (root / 'email-required-to-download.php').read_text()
 version = re.search(r'\* Version: ([\d.]+)', main).group(1)
 assert f"define( 'ERD_VERSION', '{version}' );" in main
 assert f'Stable tag: {version}' in (root / 'readme.txt').read_text()
+plugin_uri = re.search(r'\* Plugin URI: (.+)', main).group(1).strip()
+author_uri = re.search(r'\* Author URI: (.+)', main).group(1).strip()
+assert plugin_uri.rstrip('/') != author_uri.rstrip('/'), 'Plugin URI and Author URI must be different'
+assert re.search(r'^Contributors: hdyhaus, mariaojob$', (root / 'readme.txt').read_text(), re.M)
 files = [root / n for n in ['email-required-to-download.php', 'uninstall.php', 'readme.txt', 'README.md']]
 for directory in ['includes', 'assets', 'blocks']:
     files.extend(p for p in (root / directory).rglob('*') if p.is_file() and not p.name.startswith('.'))
