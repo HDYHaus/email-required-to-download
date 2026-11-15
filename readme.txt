@@ -4,7 +4,7 @@ Tags: downloads, lead capture, email, media
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,10 @@ No. All shipped JavaScript is readable source and uses WordPress-provided librar
 This release is intended for single-site installations. Network activation and network-wide uninstall have not been verified.
 
 == Changelog ==
+
+= 1.2.3 =
+* Link the author names to the plugin landing page and use the HDY Haus plugins directory for Visit plugin site.
+
 
 = 1.2.2 =
 * Display HDY Haus and Mary Mojisola Job as the plugin authors.
