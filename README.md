@@ -2,11 +2,11 @@
 
 Require an email address before visitors can download a file.
 
-Version: 1.2.1
+Version: 1.2.2
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
