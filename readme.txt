@@ -4,7 +4,7 @@ Tags: downloads, lead capture, email, media
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.7
+Stable tag: 1.2.8
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ No. All shipped JavaScript is readable source and uses WordPress-provided librar
 This release is intended for single-site installations. Network activation and network-wide uninstall have not been verified.
 
 == Changelog ==
+
+= 1.2.8 =
+* Load frontend styles only on singular pages and posts containing the download block or shortcode.
 
 = 1.2.7 =
 * Reuse an active lead when the same email submits the same offer again, resending its confirmation link or reopening its immediate download without adding a duplicate lead.

@@ -26,6 +26,21 @@ class ERD_Frontend {
 	}
 
 	public function enqueue() {
+		if ( ! is_singular() ) {
+			return;
+		}
+
+		$post = get_queried_object();
+		if ( ! $post instanceof WP_Post ) {
+			return;
+		}
+
+		$has_shortcode = has_shortcode( $post->post_content, 'email_required_download' );
+		$has_block     = has_block( 'email-required-to-download/download', $post->post_content );
+		if ( ! $has_shortcode && ! $has_block ) {
+			return;
+		}
+
 		wp_enqueue_style( 'erd-frontend', ERD_PLUGIN_URL . 'assets/css/frontend.css', array(), ERD_VERSION );
 	}
 
