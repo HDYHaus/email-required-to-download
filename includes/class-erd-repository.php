@@ -179,7 +179,41 @@ class ERD_Repository {
 
 	public function update_lead_token( $lead_id, $token ) {
 		global $wpdb;
-		$wpdb->update( $this->leads_table(), array( 'token' => sanitize_text_field( $token ) ), array( 'id' => absint( $lead_id ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$result = $wpdb->update( $this->leads_table(), array( 'token' => sanitize_text_field( $token ) ), array( 'id' => absint( $lead_id ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		return false !== $result;
+	}
+
+	public function update_lead_download_token( $lead_id, $token, $expires_at ) {
+		global $wpdb;
+		$result = $wpdb->update(
+			$this->leads_table(),
+			array(
+				'token'            => sanitize_text_field( $token ),
+				'token_expires_at' => sanitize_text_field( $expires_at ),
+			),
+			array( 'id' => absint( $lead_id ) )
+		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+
+		return false !== $result;
+	}
+
+	public function get_lead( $lead_id ) {
+		global $wpdb;
+		$table = esc_sql( $this->leads_table() );
+		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", absint( $lead_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	public function get_active_leads_by_email( $offer_id, $email ) {
+		global $wpdb;
+		$table = esc_sql( $this->leads_table() );
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$table} WHERE offer_id = %d AND email = %s AND token_expires_at > %s ORDER BY id DESC LIMIT 20",
+				absint( $offer_id ),
+				sanitize_email( $email ),
+				gmdate( 'Y-m-d H:i:s' )
+			)
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	public function update_lead_email_status( $lead_id, $status ) {
@@ -197,21 +231,36 @@ class ERD_Repository {
 	public function get_lead_by_token( $token ) {
 		global $wpdb;
 		$table = esc_sql( $this->leads_table() );
-		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE token = %s", sanitize_text_field( $token ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		foreach ( ERD_Tokens::storage_candidates( $token ) as $candidate ) {
+			$lead = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE token = %s", $candidate ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			if ( $lead ) {
+				return $lead;
+			}
+		}
+
+		return null;
 	}
 
 	public function validate_token( $token, $offer_id = 0 ) {
-		$parts = ERD_Tokens::parse( $token );
+		$failure_reason = '';
+		$parts = ERD_Tokens::parse( $token, $failure_reason );
 		if ( ! $parts ) {
+			ERD_Tokens::log_validation_failure( $failure_reason );
 			return false;
 		}
 
 		if ( $offer_id && absint( $offer_id ) !== absint( $parts['offer_id'] ) ) {
+			ERD_Tokens::log_validation_failure( 'offer_mismatch' );
 			return false;
 		}
 
 		$lead = $this->get_lead_by_token( $token );
-		if ( ! $lead || absint( $lead->id ) !== $parts['lead_id'] || absint( $lead->offer_id ) !== $parts['offer_id'] ) {
+		if ( ! $lead ) {
+			ERD_Tokens::log_validation_failure( 'lead_not_found_for_token' );
+			return false;
+		}
+		if ( absint( $lead->id ) !== $parts['lead_id'] || absint( $lead->offer_id ) !== $parts['offer_id'] ) {
+			ERD_Tokens::log_validation_failure( 'lead_or_offer_record_mismatch' );
 			return false;
 		}
 

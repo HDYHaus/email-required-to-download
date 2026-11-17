@@ -4,7 +4,7 @@ Tags: downloads, lead capture, email, media
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.3
+Stable tag: 1.2.7
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,19 @@ No. All shipped JavaScript is readable source and uses WordPress-provided librar
 This release is intended for single-site installations. Network activation and network-wide uninstall have not been verified.
 
 == Changelog ==
+
+= 1.2.7 =
+* Reuse an active lead when the same email submits the same offer again, resending its confirmation link or reopening its immediate download without adding a duplicate lead.
+
+= 1.2.6 =
+* Link each offer's submission count to its filtered leads list.
+
+= 1.2.5 =
+* Use URL-safe unpadded tokens and accept existing standard Base64 tokens with missing padding.
+
+= 1.2.4 =
+* Log token validation failure reasons when WordPress debug logging is enabled, without recording tokens or personal data.
+* Check token writes during submissions and add an admin action to issue and email a fresh download link for an existing lead.
 
 = 1.2.3 =
 * Link the author names to the plugin landing page and use the HDY Haus plugins directory for Visit plugin site.

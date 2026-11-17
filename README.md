@@ -2,11 +2,11 @@
 
 Require an email address before visitors can download a file.
 
-Version: 1.2.3
+Version: 1.2.7
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.3
+Stable tag: 1.2.7
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,8 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 - Store leads locally in WordPress.
 - Track submissions, unique emails, and downloads.
 - Show confirmation email send status for leads.
+- Resend a fresh, expiring download link from a lead's admin row.
+- Reuse active download access when a visitor submits the same offer again.
 - Validate ready links before showing download buttons.
 - Browse leads in pages of 25, with row numbers and recorded consent status.
 - Export lead and download data as CSV.
@@ -67,4 +69,4 @@ The JavaScript in `assets/js` and `blocks/email-required-download` is the shippe
 
 Run `php tests/release-regressions.php` for the isolated file-lifecycle and CSV safety regressions. Run `python3 tools/build-release.py` to build the installable ZIP and verify its manifest. GitHub Actions checks PHP/JavaScript syntax, these regressions, and package reproducibility for pull requests and updates to `main`.
 
-Future enhancements remain tracked in [GitHub issues](https://github.com/HDYHaus/email-required-to-download/issues), including returning-visitor link resends and optional per-file analytics. The current release tracks downloads per lead/offer.
+Future enhancements remain tracked in [GitHub issues](https://github.com/HDYHaus/email-required-to-download/issues), including optional per-file analytics. The current release tracks downloads per lead/offer.

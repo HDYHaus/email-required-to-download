@@ -139,6 +139,23 @@ class ERD_Frontend {
 
 		$settings = $this->repository->get_settings();
 		$expires  = time() + ( max( 1, absint( $settings['token_expiry_hours'] ) ) * HOUR_IN_SECONDS );
+		$active_leads = $this->repository->get_active_leads_by_email( $offer_id, $email );
+		foreach ( $active_leads as $active_lead ) {
+			if ( ! $this->repository->validate_token( $active_lead->token, $offer_id ) ) {
+				continue;
+			}
+
+			if ( $offer->require_confirmation ) {
+				$sent = $this->send_confirmation_email( $email, $offer, $this->access_url( $redirect, $offer_id, $active_lead->token ) );
+				$this->repository->update_lead_email_status( $active_lead->id, $sent ? 'sent' : 'failed' );
+				wp_safe_redirect( add_query_arg( array( 'erd_status' => $sent ? 'sent' : 'email_failed', 'erd_offer' => $offer_id ), $redirect ) );
+				exit;
+			}
+
+			wp_safe_redirect( add_query_arg( array( 'erd_status' => 'ready', 'erd_offer' => $offer_id, 'erd_token' => $active_lead->token ), $redirect ) );
+			exit;
+		}
+
 		$lead_id  = $this->repository->create_lead(
 			array(
 				'offer_id'         => $offer_id,
@@ -153,9 +170,18 @@ class ERD_Frontend {
 				'user_agent'       => isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_textarea_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '',
 			)
 		);
+		if ( ! $lead_id ) {
+			ERD_Tokens::log_validation_failure( 'lead_insert_failed' );
+			wp_safe_redirect( add_query_arg( array( 'erd_status' => 'email_failed', 'erd_offer' => $offer_id ), $redirect ) );
+			exit;
+		}
 
 		$token = ERD_Tokens::create( $lead_id, $offer_id, $expires );
-		$this->repository->update_lead_token( $lead_id, $token );
+		if ( ! $this->repository->update_lead_token( $lead_id, $token ) ) {
+			ERD_Tokens::log_validation_failure( 'token_write_failed_after_submission' );
+			wp_safe_redirect( add_query_arg( array( 'erd_status' => 'email_failed', 'erd_offer' => $offer_id ), $redirect ) );
+			exit;
+		}
 
 		if ( $offer->require_confirmation ) {
 			$sent = $this->send_confirmation_email( $email, $offer, $this->access_url( $redirect, $offer_id, $token ) );
