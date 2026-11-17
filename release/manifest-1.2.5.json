@@ -1,0 +1,25 @@
+{
+  "version": "1.2.5",
+  "archive": "email-required-to-download-1.2.5.zip",
+  "sha256": "cda641a3ccde3d77a23e207ba43be9d6a433de0c01be069d4dcd169c18a3cb9f",
+  "files": {
+    "README.md": "70f2cd8fb34ab3da3699c35f09bd981ff90565dc2a92badbcdfcde7d4b2b111b",
+    "assets/css/admin.css": "66ae5dc8e71dca89c71733ecd26384c2759bae142496e9565106b6e572185312",
+    "assets/css/frontend.css": "263178b0afe726da7105bb14b7ea0ea086cab847ca3d127ec87e6cc42809a5e7",
+    "assets/js/admin.js": "eaf1ff5fed98e4a4c2c1c65f7dd4b7f665fc9222ea49843d03a146959786b368",
+    "blocks/email-required-download/block.json": "bd4022b6d165bedd7043ed0d17736db357b8f42b5b0ddc72d38d21073a6c1caf",
+    "blocks/email-required-download/editor.css": "256824d29412c706a7e65a268369deccad79de3b7674409adaa49fdecd8ea0a6",
+    "blocks/email-required-download/index.asset.php": "c09d259198aa271492d9ff5bf077ea5a3b36916bbcd27ceb1510ca83352ffe13",
+    "blocks/email-required-download/index.js": "26ae208293ac79654fd2540f31678b9aef0c7c327bb92d6a67ceae09ee80e898",
+    "email-required-to-download.php": "b1f3c885d8f48c651b845e5ee9eeffd6903a0e5ab07822d91e0094977fc84515",
+    "includes/class-erd-activator.php": "6ce44920d2db4678950269b03d88338748e2b7bc29b158f4cf3ab401d6165a04",
+    "includes/class-erd-admin.php": "c7bdffec60d35c9995472885109093804dcda71b9ff625c857cdc2211dc464bd",
+    "includes/class-erd-block.php": "a8af0e5b5f1694475b6bbec72cee0ac7ed1bc7f40bcf2395afc8e3ad93eb24bc",
+    "includes/class-erd-frontend.php": "90a4b96a912fc7710393b02f365b14089dfc63fa3c9be225a95b0f60840c2281",
+    "includes/class-erd-plugin.php": "9dc63b05b8ed5afac3225a40d98ee5f5b7cf6f20a619554b57994b7b07d46201",
+    "includes/class-erd-repository.php": "8fd727babbbd45e0dbb135e949a8f394f51d6ea357140e2dcb2ac9fa92fae9ab",
+    "includes/class-erd-tokens.php": "a2156db3771f65bb82ec5126b03eefed2f8676f28f7a6e11e0af486dba87611b",
+    "readme.txt": "d43f1850c006b2a66ff5f40210308fa5cc9c509cfb0c22d709edfa8e10ce955f",
+    "uninstall.php": "5b7b57f28d8e36a4a1dc0aeebfa54564e057c07849972ae5824e4ec42de8375f"
+  }
+}

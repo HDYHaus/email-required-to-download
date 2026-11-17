@@ -23,6 +23,7 @@ class ERD_Admin {
 		add_action( 'admin_post_erd_delete_offer', array( $this, 'delete_offer' ) );
 		add_action( 'admin_post_erd_save_settings', array( $this, 'save_settings' ) );
 		add_action( 'admin_post_erd_export_leads', array( $this, 'export_leads' ) );
+		add_action( 'admin_post_erd_resend_download', array( $this, 'resend_download' ) );
 	}
 
 	public function admin_menu() {
@@ -130,9 +131,11 @@ class ERD_Admin {
 		}
 
 		$messages = array(
-			'saved'    => __( 'Saved.', 'email-required-to-download' ),
-			'deleted'  => __( 'Deleted.', 'email-required-to-download' ),
-			'settings' => __( 'Settings saved.', 'email-required-to-download' ),
+			'saved'         => __( 'Saved.', 'email-required-to-download' ),
+			'deleted'       => __( 'Deleted.', 'email-required-to-download' ),
+			'settings'      => __( 'Settings saved.', 'email-required-to-download' ),
+			'resend_sent'   => __( 'A fresh download link was emailed to the lead.', 'email-required-to-download' ),
+			'resend_failed' => __( 'The download link could not be sent. Check the site email configuration and debug log.', 'email-required-to-download' ),
 		);
 		$key      = sanitize_key( wp_unslash( $_GET['erd_notice'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
@@ -163,11 +166,15 @@ class ERD_Admin {
 				<tbody>
 					<?php if ( $offers ) : ?>
 						<?php foreach ( $offers as $offer ) : ?>
-							<?php $stats = $this->repository->get_offer_stats( $offer->id ); ?>
+							<?php
+							$stats = $this->repository->get_offer_stats( $offer->id );
+							/* translators: %s: offer title. */
+							$submissions_label = sprintf( __( 'View submissions for %s', 'email-required-to-download' ), $offer->title );
+							?>
 							<tr>
 								<td><strong><?php echo esc_html( $offer->title ); ?></strong></td>
 								<td><code>[email_required_download id="<?php echo esc_attr( $offer->id ); ?>"]</code></td>
-								<td><?php echo esc_html( $stats['submissions'] ); ?></td>
+								<td><a href="<?php echo esc_url( $this->admin_url( 'erd-leads', array( 'offer_id' => absint( $offer->id ) ) ) ); ?>" aria-label="<?php echo esc_attr( $submissions_label ); ?>"><?php echo esc_html( $stats['submissions'] ); ?></a></td>
 								<td><?php echo esc_html( $stats['unique_emails'] ); ?></td>
 								<td><?php echo esc_html( $stats['downloads'] ); ?></td>
 								<td>
@@ -371,6 +378,7 @@ class ERD_Admin {
 	}
 
 	public function render_leads_page() {
+		$this->notice();
 		$offer_id = isset( $_GET['offer_id'] ) ? absint( $_GET['offer_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$offers   = $this->repository->get_offers();
 		$stats    = $this->repository->get_offer_stats( $offer_id );
@@ -403,7 +411,7 @@ class ERD_Admin {
 			<?php $this->render_lead_pagination( $total, $paged, $per_page, $offer_id, 'top' ); ?>
 			<div class="erd-leads-table-wrap">
 			<table class="widefat striped">
-				<thead><tr><th scope="col"><?php esc_html_e( '#', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Offer', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Email', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Name', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Consent', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Submitted', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Email Status', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Downloads', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Downloaded', 'email-required-to-download' ); ?></th></tr></thead>
+				<thead><tr><th scope="col"><?php esc_html_e( '#', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Offer', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Email', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Name', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Consent', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Submitted', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Email Status', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Downloads', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Downloaded', 'email-required-to-download' ); ?></th><th scope="col"><?php esc_html_e( 'Actions', 'email-required-to-download' ); ?></th></tr></thead>
 				<tbody>
 					<?php if ( $leads ) : ?>
 						<?php foreach ( $leads as $index => $lead ) : ?>
@@ -417,10 +425,18 @@ class ERD_Admin {
 								<td><?php echo esc_html( $this->email_status_label( $lead ) ); ?></td>
 								<td><?php echo esc_html( $lead->download_count ); ?></td>
 								<td><?php echo esc_html( $lead->downloaded_at ); ?></td>
+								<td>
+									<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+										<input type="hidden" name="action" value="erd_resend_download">
+										<input type="hidden" name="lead_id" value="<?php echo esc_attr( $lead->id ); ?>">
+										<?php wp_nonce_field( 'erd_resend_download_' . absint( $lead->id ) ); ?>
+										<button class="button-link" type="submit"><?php esc_html_e( 'Resend download link', 'email-required-to-download' ); ?></button>
+									</form>
+								</td>
 							</tr>
 						<?php endforeach; ?>
 					<?php else : ?>
-						<tr><td colspan="9"><?php esc_html_e( 'No leads yet.', 'email-required-to-download' ); ?></td></tr>
+						<tr><td colspan="10"><?php esc_html_e( 'No leads yet.', 'email-required-to-download' ); ?></td></tr>
 					<?php endif; ?>
 				</tbody>
 			</table>
@@ -428,6 +444,64 @@ class ERD_Admin {
 			<?php $this->render_lead_pagination( $total, $paged, $per_page, $offer_id, 'bottom' ); ?>
 		</div>
 		<?php
+	}
+
+	public function resend_download() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to resend download links.', 'email-required-to-download' ) );
+		}
+
+		$lead_id = isset( $_POST['lead_id'] ) ? absint( $_POST['lead_id'] ) : 0;
+		check_admin_referer( 'erd_resend_download_' . $lead_id );
+
+		$lead  = $this->repository->get_lead( $lead_id );
+		$offer = $lead ? $this->repository->get_offer( $lead->offer_id ) : null;
+		$files = $offer ? $this->repository->get_offer_files( $offer->id ) : array();
+		$sent  = false;
+		if ( $lead && $offer && $files && is_email( $lead->email ) ) {
+			$settings = $this->repository->get_settings();
+			$expires  = time() + ( max( 1, absint( $settings['token_expiry_hours'] ) ) * HOUR_IN_SECONDS );
+			$token    = ERD_Tokens::create( $lead->id, $offer->id, $expires );
+			if ( $this->repository->update_lead_download_token( $lead->id, $token, gmdate( 'Y-m-d H:i:s', $expires ) ) ) {
+				$links = array();
+				foreach ( $files as $file ) {
+					$url = add_query_arg(
+						array(
+							'action'  => 'erd_download',
+							'token'   => $token,
+							'file_id' => absint( $file->id ),
+						),
+						admin_url( 'admin-post.php' )
+					);
+					$label   = ! empty( $file->file_label ) ? $file->file_label : $offer->title;
+					$links[] = $label . ': ' . $url;
+				}
+
+				$expiry_hours = max( 1, absint( $settings['token_expiry_hours'] ) );
+				/* translators: %d: number of hours before the download link expires. */
+				$expiry_duration = sprintf( _n( '%d hour', '%d hours', $expiry_hours, 'email-required-to-download' ), $expiry_hours );
+
+				/* translators: %s: offer title. */
+				$subject = sprintf( __( 'Your download: %s', 'email-required-to-download' ), $offer->title );
+				$message = sprintf(
+					/* translators: 1: offer title, 2: download links, 3: link expiry duration. */
+					__( "Here is your download for %1\$s:\n\n%2\$s\n\nThis link expires in %3\$s.", 'email-required-to-download' ),
+					$offer->title,
+					implode( "\n", $links ),
+					$expiry_duration
+				);
+				$sent = wp_mail( $lead->email, $subject, $message );
+				if ( ! $sent && ! $this->repository->update_lead_download_token( $lead->id, $lead->token, $lead->token_expires_at ) ) {
+					ERD_Tokens::log_validation_failure( 'token_restore_failed_after_resend_email_failure' );
+				}
+			} else {
+				ERD_Tokens::log_validation_failure( 'token_write_failed_during_resend' );
+			}
+		}
+
+		$notice = $sent ? 'resend_sent' : 'resend_failed';
+		wp_safe_redirect( $this->admin_url( 'erd-leads', array( 'erd_notice' => $notice ) ) );
+		exit;
 	}
 
 	private function render_lead_pagination( $total, $paged, $per_page, $offer_id, $position ) {
