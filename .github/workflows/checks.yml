@@ -23,5 +23,5 @@ jobs:
       - name: Verify release package and whitespace
         run: |
           python3 tools/build-release.py
-          git diff --exit-code -- release/manifest-1.2.7.json
+          git diff --exit-code -- release/manifest-1.2.8.json
           git diff --check
