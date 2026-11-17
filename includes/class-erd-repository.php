@@ -205,10 +205,10 @@ class ERD_Repository {
 
 	public function get_active_leads_by_email( $offer_id, $email ) {
 		global $wpdb;
-		$table = esc_sql( $this->leads_table() );
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE offer_id = %d AND email = %s AND token_expires_at > %s ORDER BY id DESC LIMIT 20",
+				'SELECT * FROM %i WHERE offer_id = %d AND email = %s AND token_expires_at > %s ORDER BY id DESC LIMIT 20',
+				$this->leads_table(),
 				absint( $offer_id ),
 				sanitize_email( $email ),
 				gmdate( 'Y-m-d H:i:s' )

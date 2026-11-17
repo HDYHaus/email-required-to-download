@@ -166,11 +166,15 @@ class ERD_Admin {
 				<tbody>
 					<?php if ( $offers ) : ?>
 						<?php foreach ( $offers as $offer ) : ?>
-							<?php $stats = $this->repository->get_offer_stats( $offer->id ); ?>
+							<?php
+							$stats = $this->repository->get_offer_stats( $offer->id );
+							/* translators: %s: offer title. */
+							$submissions_label = sprintf( __( 'View submissions for %s', 'email-required-to-download' ), $offer->title );
+							?>
 							<tr>
 								<td><strong><?php echo esc_html( $offer->title ); ?></strong></td>
 								<td><code>[email_required_download id="<?php echo esc_attr( $offer->id ); ?>"]</code></td>
-								<td><a href="<?php echo esc_url( $this->admin_url( 'erd-leads', array( 'offer_id' => absint( $offer->id ) ) ) ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'View submissions for %s', 'email-required-to-download' ), $offer->title ) ); ?>"><?php echo esc_html( $stats['submissions'] ); ?></a></td>
+								<td><a href="<?php echo esc_url( $this->admin_url( 'erd-leads', array( 'offer_id' => absint( $offer->id ) ) ) ); ?>" aria-label="<?php echo esc_attr( $submissions_label ); ?>"><?php echo esc_html( $stats['submissions'] ); ?></a></td>
 								<td><?php echo esc_html( $stats['unique_emails'] ); ?></td>
 								<td><?php echo esc_html( $stats['downloads'] ); ?></td>
 								<td>
@@ -473,13 +477,18 @@ class ERD_Admin {
 					$links[] = $label . ': ' . $url;
 				}
 
+				$expiry_hours = max( 1, absint( $settings['token_expiry_hours'] ) );
+				/* translators: %d: number of hours before the download link expires. */
+				$expiry_duration = sprintf( _n( '%d hour', '%d hours', $expiry_hours, 'email-required-to-download' ), $expiry_hours );
+
+				/* translators: %s: offer title. */
 				$subject = sprintf( __( 'Your download: %s', 'email-required-to-download' ), $offer->title );
 				$message = sprintf(
 					/* translators: 1: offer title, 2: download links, 3: link expiry duration. */
 					__( "Here is your download for %1\$s:\n\n%2\$s\n\nThis link expires in %3\$s.", 'email-required-to-download' ),
 					$offer->title,
 					implode( "\n", $links ),
-					sprintf( _n( '%d hour', '%d hours', max( 1, absint( $settings['token_expiry_hours'] ) ), 'email-required-to-download' ), max( 1, absint( $settings['token_expiry_hours'] ) ) )
+					$expiry_duration
 				);
 				$sent = wp_mail( $lead->email, $subject, $message );
 				if ( ! $sent && ! $this->repository->update_lead_download_token( $lead->id, $lead->token, $lead->token_expires_at ) ) {
